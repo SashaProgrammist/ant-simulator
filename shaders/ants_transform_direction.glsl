@@ -1,10 +1,14 @@
 #version 400
 
+#define pi 3.14159265359
+#define pi2 6.28318530718
+
 in vec2 in_position;
 in vec2 in_direction;
 in float in_index;
 uniform float time;
 uniform float frame_time;
+uniform sampler2D mappTexture;
 out vec2 out_direction;
 
 float confusion = 0;
@@ -18,6 +22,26 @@ void main() {
     vec2 cos_sin = vec2(cos(angel), sin(angel));
     mat2 mat = mat2(vec2(cos_sin.x, -cos_sin.y), \
                     vec2(cos_sin.y, cos_sin.x));
-    vec2 nev = mat * in_direction;
-    out_direction = normalize(in_direction + nev);
+    vec2 randomDirection = mat * in_direction;
+
+    vec2 mappDirection = vec2(0);
+    float radius = 0.04;
+    float density = 0.001;
+    float levels = 2.;
+    for (int i = 1; i <= levels; i++) {
+        float currentRadius = (i / levels) * radius;
+        float lengthCircle = currentRadius * pi2;
+        float countPoint = ceil(lengthCircle / density) - 1.;
+        for (int j = 0; j < countPoint; j++) {
+            float radian = j * pi2 / countPoint;
+            vec2 ovset = vec2(cos(radian), sin(radian));
+            vec2 point = ovset * currentRadius + in_position;
+
+            float mapp = 1 - texture(mappTexture, (point + vec2(1, 1)) / 2).r;
+
+            mappDirection += -ovset * mapp * 10;
+        }
+    }
+
+    out_direction = normalize(in_direction + randomDirection + mappDirection);
 }

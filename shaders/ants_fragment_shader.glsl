@@ -1,8 +1,10 @@
 #version 400
 
-in float in_index;
+in float v_index;
+in vec2 v_position;
 uniform float time;
 uniform float frame_time;
+uniform vec2 resolution;
 out vec4 fragColor;
 
 void main() {

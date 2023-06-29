@@ -22,14 +22,14 @@ class App(mglw.WindowConfig):
             fragment_shader='global_fragment_shader.glsl')
 
         self.mapp_quad = geometry.quad_fs()
+        self.mapp_texture = self.load_texture_2d("../mapp/mapp.png")
         self.mapp_prog = self.load_program(
             vertex_shader='mapp_vertex_shader.glsl',
             fragment_shader='mapp_fragment_shader.glsl')
-        self.mapp_texture = self.load_texture_2d("../mapp/mapp.png")
         self.set_uniform(self.mapp_prog, "mappTexture", 1)
         self.mapp_texture.use(location=1)
 
-        self.countAnts = 1000000
+        self.countAnts = 100000
         self.ants: VAO | None = None
         self.antsBuffer = self.ctx.buffer(reserve=self.countAnts * 2 * 4)  # buffer for vec2
         self.ants_graphic_prog = self.load_program(
@@ -43,6 +43,7 @@ class App(mglw.WindowConfig):
             vertex_shader='ants_transform_direction.glsl',
             varyings=["out_direction"]
         )
+        self.set_uniform(self.ants_transform_direction_prog, "mappTexture", 1)
         self.initAnts()
 
         self.set_newResolution()
@@ -51,7 +52,7 @@ class App(mglw.WindowConfig):
 
     def initAnts(self):
         self.ants = VAO("ants", mode=mgl.POINTS)
-        # self.ants.ctx.point_size = 60
+        self.ants.ctx.point_size = 5
 
         indexData = np.array(np.arange(self.countAnts),
                              dtype=np.float32)
@@ -73,6 +74,7 @@ class App(mglw.WindowConfig):
     def set_newResolution(self):
         self.set_uniform(self.mapp_prog, "resolution", self.window_size)
         self.set_uniform(self.global_prog, "resolution", self.window_size)
+        self.set_uniform(self.ants_graphic_prog, "resolution", self.window_size)
 
     def _render(self):
         self.mapp_quad.render(self.mapp_prog)
