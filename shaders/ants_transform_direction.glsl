@@ -25,9 +25,9 @@ void main() {
     vec2 randomDirection = mat * in_direction;
 
     vec2 mappDirection = vec2(0);
-    float radius = 0.04;
+    float radius = 0.03;
     float density = 0.001;
-    float levels = 2.;
+    float levels = 3.;
     for (int i = 1; i <= levels; i++) {
         float currentRadius = (i / levels) * radius;
         float lengthCircle = currentRadius * pi2;
@@ -37,9 +37,9 @@ void main() {
             vec2 ovset = vec2(cos(radian), sin(radian));
             vec2 point = ovset * currentRadius + in_position;
 
-            float mapp = 1 - texture(mappTexture, (point + vec2(1, 1)) / 2).r;
+            float mapp = 1 - texture(mappTexture, (point + 1) / 2).r;
 
-            mappDirection += -ovset * mapp * 10;
+            mappDirection += -ovset * mapp / currentRadius / 1000;
         }
     }
 

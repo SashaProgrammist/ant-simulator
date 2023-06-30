@@ -2,6 +2,7 @@ import moderngl as mgl
 import moderngl_window as mglw
 from moderngl_window import geometry
 from moderngl_window.opengl.vao import VAO
+from moderngl_window.geometry.attributes import AttributeNames
 import numpy as np
 import math
 
@@ -13,21 +14,23 @@ class App(mglw.WindowConfig):
     title = "ant simulator"
     cursor = True
     aspect_ratio = None
+    attributeNames = AttributeNames(texcoord_0="in_texCoord")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.global_quad = geometry.quad_fs()
+        self.global_quad = geometry.quad_fs(self.attributeNames)
         self.global_prog = self.load_program(
             vertex_shader='global_vertex_shader.glsl',
             fragment_shader='global_fragment_shader.glsl')
+        self.set_uniform(self.global_prog, "mappTexture", 1)
 
-        self.mapp_quad = geometry.quad_fs()
+        self.mapp_quad = geometry.quad_fs(self.attributeNames)
         self.mapp_texture = self.load_texture_2d("../mapp/mapp.png")
+        self.mapp_texture.use(location=1)
         self.mapp_prog = self.load_program(
             vertex_shader='mapp_vertex_shader.glsl',
             fragment_shader='mapp_fragment_shader.glsl')
         self.set_uniform(self.mapp_prog, "mappTexture", 1)
-        self.mapp_texture.use(location=1)
 
         self.countAnts = 100000
         self.ants: VAO | None = None
@@ -37,12 +40,10 @@ class App(mglw.WindowConfig):
             fragment_shader='ants_fragment_shader.glsl')
         self.ants_transform_position_prog = self.load_program(
             vertex_shader='ants_transform_position.glsl',
-            varyings=["out_position"]
-        )
+            varyings=["out_position"])
         self.ants_transform_direction_prog = self.load_program(
             vertex_shader='ants_transform_direction.glsl',
-            varyings=["out_direction"]
-        )
+            varyings=["out_direction"])
         self.set_uniform(self.ants_transform_direction_prog, "mappTexture", 1)
         self.initAnts()
 
@@ -95,6 +96,9 @@ class App(mglw.WindowConfig):
         self.ants.get_buffer_by_name("in_direction").buffer.write(self.antsBuffer.read())
 
     def render(self, time, frame_time):
+        if frame_time > 0.0625:
+            frame_time = 0
+
         self.ctx.clear()
 
         self.update(time, frame_time)
