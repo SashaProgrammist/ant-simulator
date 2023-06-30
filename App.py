@@ -1,10 +1,8 @@
 import moderngl as mgl
 import moderngl_window as mglw
 from moderngl_window import geometry
-from moderngl_window.opengl.vao import VAO
 from moderngl_window.geometry.attributes import AttributeNames
-import numpy as np
-import math
+from Ants import Ants
 
 
 class App(mglw.WindowConfig):
@@ -32,41 +30,11 @@ class App(mglw.WindowConfig):
             fragment_shader='mapp_fragment_shader.glsl')
         self.set_uniform(self.mapp_prog, "mappTexture", 1)
 
-        self.countAnts = 100000
-        self.ants: VAO | None = None
-        self.antsBuffer = self.ctx.buffer(reserve=self.countAnts * 2 * 4)  # buffer for vec2
-        self.ants_graphic_prog = self.load_program(
-            vertex_shader='ants_vertex_shader.glsl',
-            fragment_shader='ants_fragment_shader.glsl')
-        self.ants_transform_position_prog = self.load_program(
-            vertex_shader='ants_transform_position.glsl',
-            varyings=["out_position"])
-        self.ants_transform_direction_prog = self.load_program(
-            vertex_shader='ants_transform_direction.glsl',
-            varyings=["out_direction"])
-        self.set_uniform(self.ants_transform_direction_prog, "mappTexture", 1)
-        self.initAnts()
+        self.ants = Ants(self, 100000)
 
         self.set_newResolution()
 
         self.ctx.enable(mgl.BLEND)
-
-    def initAnts(self):
-        self.ants = VAO("ants", mode=mgl.POINTS)
-        self.ants.ctx.point_size = 5
-
-        indexData = np.array(np.arange(self.countAnts),
-                             dtype=np.float32)
-        self.ants.buffer(indexData, "1f", ["in_index"])
-
-        positionData = np.array(np.zeros(self.countAnts * 2),
-                                dtype=np.float32)
-        self.ants.buffer(positionData, "2f", ["in_position"])
-
-        angelData = np.random.random((self.countAnts,)) * 2 * math.pi
-        directionData = np.array([np.cos(angelData), np.sin(angelData)],
-                                 dtype=np.float32).T.reshape((self.countAnts * 2,))
-        self.ants.buffer(directionData, "2f", ["in_direction"])
 
     def resize(self, width: int, height: int):
         self.window_size = width, height
@@ -75,25 +43,15 @@ class App(mglw.WindowConfig):
     def set_newResolution(self):
         self.set_uniform(self.mapp_prog, "resolution", self.window_size)
         self.set_uniform(self.global_prog, "resolution", self.window_size)
-        self.set_uniform(self.ants_graphic_prog, "resolution", self.window_size)
+        self.ants.set_newResolution()
 
     def _render(self):
         self.mapp_quad.render(self.mapp_prog)
         self.global_quad.render(self.global_prog)
-        self.ants.render(self.ants_graphic_prog)
+        self.ants.render()
 
     def update(self, time, frame_time):
-        self.set_uniform(self.ants_graphic_prog, "time", time)
-        self.set_uniform(self.ants_graphic_prog, "frame_time", frame_time)
-        self.set_uniform(self.ants_transform_position_prog, "time", time)
-        self.set_uniform(self.ants_transform_position_prog, "frame_time", frame_time)
-        self.set_uniform(self.ants_transform_direction_prog, "time", time)
-        self.set_uniform(self.ants_transform_direction_prog, "frame_time", frame_time)
-
-        self.ants.transform(self.ants_transform_position_prog, self.antsBuffer)
-        self.ants.get_buffer_by_name("in_position").buffer.write(self.antsBuffer.read())
-        self.ants.transform(self.ants_transform_direction_prog, self.antsBuffer)
-        self.ants.get_buffer_by_name("in_direction").buffer.write(self.antsBuffer.read())
+        self.ants.update(time, frame_time)
 
     def render(self, time, frame_time):
         if frame_time > 0.0625:
