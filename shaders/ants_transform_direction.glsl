@@ -39,7 +39,7 @@ void main() {
 
             float mapp = 1 - texture(mappTexture, (point + 1) / 2).r;
 
-            mappDirection += -ovset * mapp / currentRadius / 1000;
+            mappDirection += -ovset * mapp / currentRadius * radius;
         }
     }
 
