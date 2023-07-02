@@ -1,11 +1,15 @@
+import logging
+
 import moderngl as mgl
 import moderngl_window as mglw
 from moderngl_window import geometry
 from moderngl_window.geometry.attributes import AttributeNames
 from Ants import Ants
+from Pheromone import Pheromone
 
 
 class App(mglw.WindowConfig):
+    log_level = logging.CRITICAL
     window_size = 1600, 900
     resource_dir = 'shaders'
     fullscreen = False
@@ -16,21 +20,24 @@ class App(mglw.WindowConfig):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
         self.global_quad = geometry.quad_fs(self.attributeNames)
         self.global_prog = self.load_program(
             vertex_shader='global_vertex_shader.glsl',
             fragment_shader='global_fragment_shader.glsl')
-        self.set_uniform(self.global_prog, "mappTexture", 1)
+        self.set_uniform(self.global_prog, "pheromone", 1)
 
         self.mapp_quad = geometry.quad_fs(self.attributeNames)
         self.mapp_texture = self.load_texture_2d("../mapp/mapp.png")
-        self.mapp_texture.use(location=1)
+        self.mapp_texture.use(location=0)
         self.mapp_prog = self.load_program(
             vertex_shader='mapp_vertex_shader.glsl',
             fragment_shader='mapp_fragment_shader.glsl')
-        self.set_uniform(self.mapp_prog, "mappTexture", 1)
+        self.set_uniform(self.mapp_prog, "mappTexture", 0)
 
-        self.ants = Ants(self, 100000)
+        self.ants = Ants(self, 100000, pointSize=5)
+
+        self.pheromone = Pheromone(self)
 
         self.set_newResolution()
 
@@ -49,9 +56,11 @@ class App(mglw.WindowConfig):
         self.mapp_quad.render(self.mapp_prog)
         self.global_quad.render(self.global_prog)
         self.ants.render()
+        self.pheromone.render()
 
     def update(self, time, frame_time):
         self.ants.update(time, frame_time)
+        self.pheromone.update()
 
     def render(self, time, frame_time):
         if frame_time > 0.0625:
