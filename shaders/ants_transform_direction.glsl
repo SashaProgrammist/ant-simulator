@@ -18,6 +18,8 @@ float random() {
 }
 
 void main() {
+    vec2 _in_position = mod((in_position + 1) / 2, 1.) * 2 - 1;
+
     float angel = random() * 6.28318530718;
     vec2 cos_sin = vec2(cos(angel), sin(angel));
     mat2 mat = mat2(vec2(cos_sin.x, -cos_sin.y), \
@@ -26,8 +28,8 @@ void main() {
 
     vec2 mappDirection = vec2(0);
     float radius = 0.03;
-    float density = 0.001;
-    float levels = 3.;
+    float density = 0.002;
+    float levels = 4.;
     for (int i = 1; i <= levels; i++) {
         float currentRadius = (i / levels) * radius;
         float lengthCircle = currentRadius * pi2;
@@ -35,13 +37,13 @@ void main() {
         for (int j = 0; j < countPoint; j++) {
             float radian = j * pi2 / countPoint;
             vec2 ovset = vec2(cos(radian), sin(radian));
-            vec2 point = ovset * currentRadius + in_position;
+            vec2 point = ovset * currentRadius + _in_position;
 
             float mapp = 1 - texture(mappTexture, (point + 1) / 2).r;
 
-            mappDirection += -ovset * mapp / currentRadius / 1000;
+            mappDirection += -ovset * mapp / currentRadius * radius * 0.025;
         }
     }
 
-    out_direction = normalize(in_direction + randomDirection + mappDirection);
+    out_direction = normalize(in_direction + randomDirection * 0.1 + mappDirection);
 }

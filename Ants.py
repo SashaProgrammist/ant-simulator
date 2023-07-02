@@ -5,6 +5,9 @@ import math
 
 
 class Ants:
+    minSpeed = 0.2
+    maxSpeed = 0.3
+
     def __init__(self, App, countAnt, pointSize=30, startPosition=(0, 0)):
         self.App = App
         self.countAnts = countAnt
@@ -39,16 +42,31 @@ class Ants:
         self.ants.buffer(indexData, "1f", ["in_index"])
         self.buffers.append((self.ants.get_buffer_by_name("in_index"), "1f"))
 
-        positionData = np.array(np.zeros(self.countAnts * 2),
-                                dtype=np.float32)
+        if self.startPosition == (0, 0):
+            positionData = np.array(np.zeros(self.countAnts * 2),
+                                    dtype=np.float32)
+        else:
+            positionData = np.array(self.startPosition * self.countAnts,
+                                    dtype=np.float32).T.reshape((self.countAnts * 2,))
         self.ants.buffer(positionData, "2f", ["in_position"])
         self.buffers.append((self.ants.get_buffer_by_name("in_position"), "2f"))
 
-        angelData = np.random.random((self.countAnts,)) * 2 * math.pi
+        angelData = np.random.random(self.countAnts) * 2 * math.pi
         directionData = np.array([np.cos(angelData), np.sin(angelData)],
                                  dtype=np.float32).T.reshape((self.countAnts * 2,))
         self.ants.buffer(directionData, "2f", ["in_direction"])
         self.buffers.append((self.ants.get_buffer_by_name("in_direction"), "2f"))
+
+        speedData = np.array(np.random.random(self.countAnts) *
+                             (Ants.maxSpeed - Ants.minSpeed) + Ants.minSpeed,
+                             dtype=np.float32)
+        self.ants.buffer(speedData, "1f", ["in_speed"])
+        self.buffers.append((self.ants.get_buffer_by_name("in_speed"), "1f"))
+
+        pheromoneData = np.array(np.zeros(self.countAnts),
+                                 dtype=np.float32)
+        self.ants.buffer(pheromoneData, "1f", ["in_pheromone"])
+        self.buffers.append((self.ants.get_buffer_by_name("in_pheromone"), "1f"))
 
     def set_newResolution(self):
         self.App.set_uniform(self.ants_graphic_prog, "resolution", self.App.window_size)

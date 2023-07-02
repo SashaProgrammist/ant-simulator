@@ -29,7 +29,7 @@ void main() {
 //        }
 //    }
 //    vec4 color = vec4(mappDirection / 10000 + 0.5, 0, 1);
-    vec4 color = vec4(texture(pheromone, v_texCoord).rgb, 0);
+    vec4 color = vec4(texture(pheromone, v_texCoord).rgb, 1);
 
     fragColor = color;
 }

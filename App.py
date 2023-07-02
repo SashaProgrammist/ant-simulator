@@ -9,7 +9,7 @@ from Pheromone import Pheromone
 
 
 class App(mglw.WindowConfig):
-    log_level = logging.CRITICAL
+    log_level = logging.INFO
     window_size = 1600, 900
     resource_dir = 'shaders'
     fullscreen = False
@@ -35,7 +35,7 @@ class App(mglw.WindowConfig):
             fragment_shader='mapp_fragment_shader.glsl')
         self.set_uniform(self.mapp_prog, "mappTexture", 0)
 
-        self.ants = Ants(self, 100000, pointSize=5)
+        self.ants = Ants(self, 100000, pointSize=5, startPosition=(-0.8, 0.8))
 
         self.pheromone = Pheromone(self)
 
@@ -63,7 +63,7 @@ class App(mglw.WindowConfig):
         self.pheromone.update()
 
     def render(self, time, frame_time):
-        if frame_time > 0.0625:
+        if frame_time > 0.03:
             frame_time = 0
 
         self.ctx.clear()

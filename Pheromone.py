@@ -6,7 +6,7 @@ from moderngl_window.opengl.vao import VAO, BufferInfo
 class Pheromone:
     countPheromone = 0
 
-    def __init__(self, App, pointSize=5, name=None):
+    def __init__(self, App, pointSize=5, name=None, isPheromoneWar=False):
         Pheromone.countPheromone += 1
 
         self.App = App
@@ -15,6 +15,7 @@ class Pheromone:
             self.name = name
         else:
             self.name = f"pheromone {Pheromone.countPheromone}"
+        self.isPheromoneWar = isPheromoneWar
 
         self.texture = self.App.ctx.texture(self.App.window_size, 3)
         self.texture.use(Pheromone.countPheromone)
@@ -36,6 +37,8 @@ class Pheromone:
         finally:
             vertex_shader.close()
             fragment_shader.close()
+        self.prog["isPheromoneWar"] = self.isPheromoneWar
+        self.prog["pheromone"] = Pheromone.countPheromone - 1
 
     def update(self):
         pass
