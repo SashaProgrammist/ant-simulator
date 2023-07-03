@@ -8,6 +8,7 @@
 in vec2 in_position;
 in vec2 in_direction;
 in float in_index;
+in float in_pheromoneControlIndex;
 uniform float time;
 uniform float frame_time;
 uniform sampler2D mappTexture;
@@ -20,7 +21,8 @@ float random() {
 }
 
 void main() {
-    vec2 _in_position = mod((in_position + 1) / 2, 1.) * 2 - 1;
+    vec2 uv = mod((in_position + 1) / 2, 1.);
+    vec2 _in_position = uv * 2 - 1;
 
     float angel = random() * pi2;
     vec2 cos_sin = vec2(cos(angel), sin(angel));
@@ -47,5 +49,12 @@ void main() {
         }
     }
 
-    out_direction = normalize(in_direction + randomDirection * 0.1 + mappDirection);
+    vec2 pheromoneDirection = \
+        normalize((texture(getPheromone(in_pheromoneControlIndex), uv).rg - 0.5) * 2);
+
+    out_direction = normalize( \
+        in_direction + \
+        randomDirection * 0.1 + \
+        mappDirection + \
+        pheromoneDirection * -0.05);
 }

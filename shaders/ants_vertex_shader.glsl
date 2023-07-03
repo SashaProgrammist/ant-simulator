@@ -13,5 +13,5 @@ void main() {
     v_position = mod((in_position + 1) / 2, 1) * 2 - 1;
     v_direction = in_direction;
     v_index = in_index;
-    gl_Position = vec4(in_position, 0, 1);
+    gl_Position = vec4(v_position, 0, 1);
 }

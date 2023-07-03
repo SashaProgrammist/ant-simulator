@@ -15,15 +15,16 @@ void main() {
         for (int i = -1; i < 2; i++) {
             for (int j = -1; j < 2; j++) {
                 if (i != 0 || j != 0) {
-                    color += redistribution * texture(pheromoneTexture,
-                    (gl_FragCoord.xy + vec2(i, j)) / resolution).rgb;
+                    color += redistribution * (texture(pheromoneTexture,
+                    (gl_FragCoord.xy + vec2(i, j)) / resolution).rgb - 0.5);
                 } else {
-                    color += weathering * texture(pheromoneTexture, \
-                                                  v_texCoord).rgb;
+                    color += (texture(pheromoneTexture, v_texCoord).rgb - 0.5);
                 }
             }
         }
     }
+    color *= weathering;
+    color += 0.5;
 
     fragColor = vec4(color, 1);
 }

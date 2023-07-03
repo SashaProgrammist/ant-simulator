@@ -90,6 +90,11 @@ class Ants:
         self.buffers.append(AntBufferInfo(
             self.ants.get_buffer_by_name("in_stackingPheromoneIndex"), "1f"))
 
+        pheromoneControlIndexData = np.array(np.zeros(self.countAnts), dtype=np.float32)
+        self.ants.buffer(pheromoneControlIndexData, "1f", ["in_pheromoneControlIndex"])
+        self.buffers.append(AntBufferInfo(
+            self.ants.get_buffer_by_name("in_pheromoneControlIndex"), "1f"))
+
     def set_newResolution(self):
         self.App.set_uniform(self.ants_graphic_prog, "resolution", self.App.window_size)
 

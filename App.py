@@ -37,7 +37,7 @@ class App(mglw.WindowConfig):
         self.set_uniform(self.mapp_prog, "mappTexture", self.mappTextureID)
 
         self.pheromone = Pheromone(self, isPheromoneWar=False,
-                                   weathering=0.99, redistribution=0.9)
+                                   weathering=0.8, redistribution=0.1)
 
         Pheromone.initPheromoneTextureInGLSL()
 
@@ -68,7 +68,7 @@ class App(mglw.WindowConfig):
 
     def update(self, time, frame_time):
         self.ants.update(time, frame_time)
-        self.pheromone.update()
+        self.pheromone.update(time, frame_time)
 
     def render(self, time, frame_time):
         if frame_time > 0.03:

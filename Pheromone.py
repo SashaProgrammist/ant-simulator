@@ -26,13 +26,16 @@ class Pheromone:
         else:
             self.name = f"pheromone_{Pheromone.countPheromone}"
         self.isPheromoneWar = isPheromoneWar
-        self.weathering = weathering - redistribution
-        self.redistribution = redistribution / 8
+        self.weathering = weathering
+        self.redistribution = redistribution
 
         self.texture = self.App.ctx.texture(self.App.window_size, 2)
         self.texture.use(Pheromone.countPheromone)
 
         self.fbo = self.App.ctx.framebuffer(self.texture)
+        self.fbo.use()
+        self.App.ctx.clear(0.5, 0.5)
+        self.App.ctx.fbo.use()
 
         self.ants: VAO = VAO(self.name, mode=mgl.POINTS)
 
@@ -52,10 +55,7 @@ class Pheromone:
                                  self.App.mappTextureID)
             self.App.set_uniform(self.pheromoneUpdate_prog, "pheromoneTexture",
                                  Pheromone.countPheromone)
-            self.App.set_uniform(self.pheromoneUpdate_prog, "weathering",
-                                 self.weathering)
-            self.App.set_uniform(self.pheromoneUpdate_prog, "redistribution",
-                                 self.redistribution)
+            self.updateWeatheringRedistribution(1, 1)
         else:
             self.pheromoneUpdate_prog = None
 
@@ -71,8 +71,23 @@ class Pheromone:
         if not self.isPheromoneWar:
             self.App.set_uniform(self.pheromoneUpdate_prog, "resolution", self.App.window_size)
 
-    def update(self):
-        pass
+    def updateWeatheringRedistribution(self, frame_time, timeScale=0.1):
+        frame_time /= timeScale
+        weathering = self.weathering ** frame_time
+        redistribution = 1 - (1 - self.redistribution) ** frame_time
+
+        weathering -= redistribution
+        redistribution /= 8
+
+        self.App.set_uniform(self.pheromoneUpdate_prog, "weathering",
+                             weathering)
+        self.App.set_uniform(self.pheromoneUpdate_prog, "redistribution",
+                             redistribution)
+
+    def update(self, time, frame_time):
+        self.App.set_uniform(self.displayAnts_prog, "frame_time", frame_time)
+        if not self.isPheromoneWar:
+            self.updateWeatheringRedistribution(frame_time)
 
     def render(self):
         self.fbo.use()
