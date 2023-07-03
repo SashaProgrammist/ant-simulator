@@ -37,11 +37,12 @@ class App(mglw.WindowConfig):
         self.set_uniform(self.mapp_prog, "mappTexture", self.mappTextureID)
 
         self.pheromone = Pheromone(self, isPheromoneWar=False,
-                                   weathering=0.8, redistribution=0.1)
+                                   weathering=0.99, redistribution=0.9,
+                                   redistributionRadius=5)
 
         Pheromone.initPheromoneTextureInGLSL()
 
-        self.ants = Ants(self, 100000, pointSize=5, startPosition=(-0., 0.))
+        self.ants = Ants(self, 100000, pointSize=5, startPosition=(-0.8, 0.8))
 
         for pheromone in Pheromone.pheromones:
             pheromone.initAnts()
@@ -63,7 +64,7 @@ class App(mglw.WindowConfig):
     def _render(self):
         self.mapp_quad.render(self.mapp_prog)
         self.global_quad.render(self.global_prog)
-        # self.ants.render()
+        self.ants.render()
         self.pheromone.render()
 
     def update(self, time, frame_time):

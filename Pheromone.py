@@ -10,7 +10,7 @@ class Pheromone:
     pheromones = []
 
     def __init__(self, App, pointSize=None, name=None, isPheromoneWar=False,
-                 weathering=0.9, redistribution=0.1):
+                 weathering=0.9, redistribution=0.1, redistributionRadius=10):
         Pheromone.countPheromone += 1
 
         self.App = App
@@ -28,6 +28,7 @@ class Pheromone:
         self.isPheromoneWar = isPheromoneWar
         self.weathering = weathering
         self.redistribution = redistribution
+        self.redistributionRadius = redistributionRadius
 
         self.texture = self.App.ctx.texture(self.App.window_size, 2)
         self.texture.use(Pheromone.countPheromone)
@@ -56,6 +57,8 @@ class Pheromone:
             self.App.set_uniform(self.pheromoneUpdate_prog, "pheromoneTexture",
                                  Pheromone.countPheromone)
             self.updateWeatheringRedistribution(1, 1)
+            self.App.set_uniform(self.pheromoneUpdate_prog, "redistributionRadius",
+                                 self.redistributionRadius)
         else:
             self.pheromoneUpdate_prog = None
 
@@ -77,7 +80,7 @@ class Pheromone:
         redistribution = 1 - (1 - self.redistribution) ** frame_time
 
         weathering -= redistribution
-        redistribution /= 8
+        redistribution /= (self.redistributionRadius * 2 + 1) ** 2 - 1
 
         self.App.set_uniform(self.pheromoneUpdate_prog, "weathering",
                              weathering)
