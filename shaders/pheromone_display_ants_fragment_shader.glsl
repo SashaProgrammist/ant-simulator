@@ -1,6 +1,6 @@
 #version 400
 
-in float v_pheromone;
+in float v_stackingPheromoneIndex;
 in vec2 v_position;
 uniform float pheromone;
 uniform bool isPheromoneWar;
@@ -15,7 +15,7 @@ void main() {
 
         fragColor = vec4(vec3(1),  (0.015 - length(uv - center)) / 0.015);
     } else {
-        if (v_pheromone == pheromone)
-            fragColor = vec4(1, 1, 1, 0.01);
+        if (v_stackingPheromoneIndex == pheromone)
+            fragColor = vec4(vec3(1), 0.01);
     }
 }

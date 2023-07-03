@@ -6,6 +6,7 @@ from moderngl_window.opengl.vao import VAO, BufferInfo
 
 class Pheromone:
     countPheromone = 0
+    pheromones = []
 
     def __init__(self, App, pointSize=None, name=None, isPheromoneWar=False,
                  weathering=0.9, redistribution=0.1):
@@ -22,15 +23,15 @@ class Pheromone:
         if name is not None:
             self.name = name
         else:
-            self.name = f"pheromone {Pheromone.countPheromone}"
+            self.name = f"pheromone_{Pheromone.countPheromone}"
         self.isPheromoneWar = isPheromoneWar
         self.weathering = weathering - redistribution
         self.redistribution = redistribution / 8
 
-        self.texture = self.App.ctx.texture(self.App.window_size, 3)
+        self.texture = self.App.ctx.texture(self.App.window_size, 1)
         self.texture.use(Pheromone.countPheromone)
 
-        self.fbo = self.App.ctx.simple_framebuffer(self.App.window_size)
+        self.fbo = self.App.ctx.framebuffer(self.texture)
 
         self.ants = VAO(self.name, mode=mgl.POINTS)
         buffers: list[tuple[BufferInfo, str]] = self.App.ants.buffers
@@ -60,6 +61,8 @@ class Pheromone:
         else:
             self.pheromoneUpdate_prog = None
 
+        Pheromone.pheromones.append(self)
+
     def set_newResolution(self):
         self.App.set_uniform(self.displayAnts_prog, "resolution", self.App.window_size)
         if not self.isPheromoneWar:
@@ -67,7 +70,6 @@ class Pheromone:
 
     def update(self):
         pass
-        self.texture.write(self.fbo.read())
 
     def render(self):
         self.fbo.use()

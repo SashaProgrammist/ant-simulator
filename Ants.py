@@ -64,10 +64,10 @@ class Ants:
         self.ants.buffer(speedData, "1f", ["in_speed"])
         self.buffers.append((self.ants.get_buffer_by_name("in_speed"), "1f"))
 
-        pheromoneData = np.array(np.zeros(self.countAnts),
-                                 dtype=np.float32)
-        self.ants.buffer(pheromoneData, "1f", ["in_pheromone"])
-        self.buffers.append((self.ants.get_buffer_by_name("in_pheromone"), "1f"))
+        stackingPheromoneIndexData = np.array(np.zeros(self.countAnts),
+                                              dtype=np.float32)
+        self.ants.buffer(stackingPheromoneIndexData, "1f", ["in_stackingPheromoneIndex"])
+        self.buffers.append((self.ants.get_buffer_by_name("in_stackingPheromoneIndex"), "1f"))
 
     def set_newResolution(self):
         self.App.set_uniform(self.ants_graphic_prog, "resolution", self.App.window_size)
