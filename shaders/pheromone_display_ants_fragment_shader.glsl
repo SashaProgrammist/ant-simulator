@@ -2,6 +2,7 @@
 
 in float v_stackingPheromoneIndex;
 in vec2 v_position;
+in vec2 v_direction;
 uniform float pheromone;
 uniform bool isPheromoneWar;
 uniform vec2 resolution;
@@ -16,6 +17,6 @@ void main() {
         fragColor = vec4(vec3(1),  (0.015 - length(uv - center)) / 0.015);
     } else {
         if (v_stackingPheromoneIndex == pheromone)
-            fragColor = vec4(vec3(1), 0.01);
+            fragColor = vec4(v_direction, 0, 0.003);
     }
 }

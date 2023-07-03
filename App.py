@@ -36,10 +36,12 @@ class App(mglw.WindowConfig):
             fragment_shader='mapp_fragment_shader.glsl')
         self.set_uniform(self.mapp_prog, "mappTexture", self.mappTextureID)
 
-        self.ants = Ants(self, 100000, pointSize=5, startPosition=(-0.8, 0.8))
-
         self.pheromone = Pheromone(self, isPheromoneWar=False,
                                    weathering=0.99, redistribution=0.9)
+
+        self.ants = Ants(self, 100000, pointSize=5, startPosition=(-0., 0.))
+
+        self.pheromone.initAnts()
 
         self.set_newResolution()
 

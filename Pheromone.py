@@ -1,7 +1,8 @@
 import moderngl as mgl
 import moderngl_window as mglw
 from moderngl_window import geometry
-from moderngl_window.opengl.vao import VAO, BufferInfo
+from moderngl_window.opengl.vao import VAO
+from Ants import AntBufferInfo
 
 
 class Pheromone:
@@ -28,15 +29,12 @@ class Pheromone:
         self.weathering = weathering - redistribution
         self.redistribution = redistribution / 8
 
-        self.texture = self.App.ctx.texture(self.App.window_size, 1)
+        self.texture = self.App.ctx.texture(self.App.window_size, 2,)
         self.texture.use(Pheromone.countPheromone)
 
         self.fbo = self.App.ctx.framebuffer(self.texture)
 
-        self.ants = VAO(self.name, mode=mgl.POINTS)
-        buffers: list[tuple[BufferInfo, str]] = self.App.ants.buffers
-        for buffer in buffers:
-            self.ants.buffer(buffer[0].buffer, buffer[1], buffer[0].attributes)
+        self.ants: VAO = VAO(self.name, mode=mgl.POINTS)
 
         self.fullScreen = geometry.quad_fs(self.App.attributeNames)
 
@@ -62,6 +60,11 @@ class Pheromone:
             self.pheromoneUpdate_prog = None
 
         Pheromone.pheromones.append(self)
+
+    def initAnts(self):
+        buffers: list[AntBufferInfo] = self.App.ants.buffers
+        for buffer in buffers:
+            self.ants.buffer(buffer.buffer, buffer.buffer_format, buffer.attributes)
 
     def set_newResolution(self):
         self.App.set_uniform(self.displayAnts_prog, "resolution", self.App.window_size)

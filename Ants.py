@@ -4,6 +4,20 @@ import numpy as np
 import math
 
 
+class AntBufferInfo:
+    def __init__(self, buffer: BufferInfo, buffer_format: str):
+        self._buffer = buffer
+        self.buffer_format = buffer_format
+
+    @property
+    def buffer(self):
+        return self._buffer.buffer
+
+    @property
+    def attributes(self):
+        return self._buffer.attributes
+
+
 class Ants:
     minSpeed = 0.2
     maxSpeed = 0.3
@@ -14,10 +28,10 @@ class Ants:
         self.pointSize = pointSize
         self.startPosition = startPosition
         self.ants: VAO | None = None
-        self.buffers: list[tuple[BufferInfo, str]] = []
+        self.buffers: list[AntBufferInfo] = []
 
         self.temporaryStorage = self.App.ctx.buffer(
-            reserve=self.countAnts * 2 * 4)  # buffer for vec2
+            reserve=self.countAnts * 2 * 4)
 
         self.ants_graphic_prog = self.App.load_program(
             vertex_shader='ants_vertex_shader.glsl',
@@ -41,7 +55,8 @@ class Ants:
         indexData = np.array(np.arange(self.countAnts),
                              dtype=np.float32)
         self.ants.buffer(indexData, "1f", ["in_index"])
-        self.buffers.append((self.ants.get_buffer_by_name("in_index"), "1f"))
+        self.buffers.append(AntBufferInfo(
+            self.ants.get_buffer_by_name("in_index"), "1f"))
 
         if self.startPosition == (0, 0):
             positionData = np.array(np.zeros(self.countAnts * 2),
@@ -50,24 +65,27 @@ class Ants:
             positionData = np.array(self.startPosition * self.countAnts,
                                     dtype=np.float32).T.reshape((self.countAnts * 2,))
         self.ants.buffer(positionData, "2f", ["in_position"])
-        self.buffers.append((self.ants.get_buffer_by_name("in_position"), "2f"))
+        self.buffers.append(AntBufferInfo(
+            self.ants.get_buffer_by_name("in_position"), "2f"))
 
         angelData = np.random.random(self.countAnts) * 2 * math.pi
         directionData = np.array([np.cos(angelData), np.sin(angelData)],
                                  dtype=np.float32).T.reshape((self.countAnts * 2,))
         self.ants.buffer(directionData, "2f", ["in_direction"])
-        self.buffers.append((self.ants.get_buffer_by_name("in_direction"), "2f"))
+        self.buffers.append(AntBufferInfo(
+            self.ants.get_buffer_by_name("in_direction"), "2f"))
 
         speedData = np.array(np.random.random(self.countAnts) *
                              (Ants.maxSpeed - Ants.minSpeed) + Ants.minSpeed,
                              dtype=np.float32)
         self.ants.buffer(speedData, "1f", ["in_speed"])
-        self.buffers.append((self.ants.get_buffer_by_name("in_speed"), "1f"))
+        self.buffers.append(AntBufferInfo(
+            self.ants.get_buffer_by_name("in_speed"), "1f"))
 
-        stackingPheromoneIndexData = np.array(np.zeros(self.countAnts),
-                                              dtype=np.float32)
+        stackingPheromoneIndexData = np.array(np.zeros(self.countAnts), dtype=np.float32)
         self.ants.buffer(stackingPheromoneIndexData, "1f", ["in_stackingPheromoneIndex"])
-        self.buffers.append((self.ants.get_buffer_by_name("in_stackingPheromoneIndex"), "1f"))
+        self.buffers.append(AntBufferInfo(
+            self.ants.get_buffer_by_name("in_stackingPheromoneIndex"), "1f"))
 
     def set_newResolution(self):
         self.App.set_uniform(self.ants_graphic_prog, "resolution", self.App.window_size)
