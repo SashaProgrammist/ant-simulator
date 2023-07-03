@@ -26,17 +26,17 @@ class App(mglw.WindowConfig):
         self.global_prog = self.load_program(
             vertex_shader='global_vertex_shader.glsl',
             fragment_shader='global_fragment_shader.glsl')
-        self.set_uniform(self.global_prog, "pheromone", 1)
+        self.set_uniform(self.global_prog, "_texture", 2)
 
         self.mapp = Mapp(self)
 
         self.pheromone = Pheromone(self, isPheromoneWar=False,
-                                   weathering=0.99, redistribution=0.9,
+                                   weathering=0.99, redistribution=0.1,
                                    redistributionRadius=5)
 
         Pheromone.initPheromoneTextureInGLSL()
 
-        self.ants = Ants(self, 100000, pointSize=5, startPosition=(-0.8, 0.8))
+        self.ants = Ants(self, 100000, pointSize=5, startPosition=(-0., 0.))
 
         for pheromone in Pheromone.pheromones:
             pheromone.initAnts()
@@ -58,7 +58,7 @@ class App(mglw.WindowConfig):
     def _render(self):
         self.mapp.render()
         self.global_quad.render(self.global_prog)
-        self.ants.render()
+        # self.ants.render()
         self.pheromone.render()
 
     def update(self, time, frame_time):

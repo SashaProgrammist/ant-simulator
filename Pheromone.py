@@ -4,6 +4,7 @@ from moderngl_window import geometry
 from moderngl_window.opengl.vao import VAO
 
 from Ants import AntBufferInfo
+from Mapp import Mapp
 
 
 class Pheromone:
@@ -51,7 +52,7 @@ class Pheromone:
             self.pheromoneUpdate_prog = self.App.load_program(
                 vertex_shader="pheromone_update_vertex_shader.glsl",
                 fragment_shader="pheromone_update_fragment_shader.glsl")
-            self.App.mapp.set_uniformTextures(self.pheromoneUpdate_prog, "mappTexture")
+            self.App.mapp.set_uniformTextures(self.pheromoneUpdate_prog, Mapp.mappTexture)
             self.App.set_uniform(self.pheromoneUpdate_prog, "pheromoneTexture",
                                  Pheromone.countPheromone + self.App.mapp.countTextures)
             self.updateWeatheringRedistribution(1, 1)

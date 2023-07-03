@@ -11,7 +11,7 @@ in float in_index;
 in float in_pheromoneControlIndex;
 uniform float time;
 uniform float frame_time;
-uniform sampler2D mappTexture;
+uniform sampler2D mappDirection;
 out vec2 out_direction;
 
 float confusion = 0;
@@ -30,31 +30,21 @@ void main() {
                     vec2(cos_sin.y, cos_sin.x));
     vec2 randomDirection = mat * in_direction;
 
-    vec2 mappDirection = vec2(0);
-    float radius = 0.03;
-    float density = 0.002;
-    float levels = 4.;
-    for (int i = 1; i <= levels; i++) {
-        float currentRadius = (i / levels) * radius;
-        float lengthCircle = currentRadius * pi2;
-        float countPoint = ceil(lengthCircle / density) - 1.;
-        for (int j = 0; j < countPoint; j++) {
-            float radian = j * pi2 / countPoint;
-            vec2 ovset = vec2(cos(radian), sin(radian));
-            vec2 point = ovset * currentRadius + _in_position;
-
-            float mapp = 1 - texture(mappTexture, (point + 1) / 2).r;
-
-            mappDirection += -ovset * mapp / currentRadius * radius * 0.025;
-        }
-    }
+    vec2 _mappDirection = texture(mappDirection, uv).rg;
+    _mappDirection -= 0.5;
+    _mappDirection /= 0.5;
 
     vec2 pheromoneDirection = \
         normalize((texture(getPheromone(in_pheromoneControlIndex), uv).rg - 0.5) * 2);
+    angel = pi / 2;
+    cos_sin = vec2(cos(angel), sin(angel));
+    mat = mat2(vec2(cos_sin.x, -cos_sin.y), \
+               vec2(cos_sin.y, cos_sin.x));
+    pheromoneDirection = mat * pheromoneDirection;
 
     out_direction = normalize( \
         in_direction + \
         randomDirection * 0.1 + \
-        mappDirection + \
-        pheromoneDirection * -0.05);
+        _mappDirection + \
+        pheromoneDirection * -0.1);
 }

@@ -5,7 +5,7 @@
 
 in vec2 v_texCoord;
 in vec2 v_position;
-uniform sampler2D pheromone;
+uniform sampler2D _texture;
 uniform vec2 resolution;
 out vec4 fragColor;
 
@@ -30,7 +30,7 @@ void main() {
 //    }
 //    vec4 color = vec4(mappDirection / 10000 + 0.5, 0, 1);
 //    vec4 color = vec4(vec3(0), 1 - texture(pheromone, v_texCoord).r);
-    vec4 color = vec4(texture(pheromone, v_texCoord).rgb, 1);
+    vec4 color = vec4(texture(_texture, v_texCoord).rgb, 1);
 
     fragColor = color;
 }

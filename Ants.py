@@ -3,6 +3,8 @@ from moderngl_window.opengl.vao import VAO, BufferInfo
 import numpy as np
 import math
 
+from Mapp import Mapp
+
 
 class AntBufferInfo:
     def __init__(self, buffer: BufferInfo, buffer_format: str):
@@ -45,7 +47,7 @@ class Ants:
             varyings=["out_direction"])
 
         self.App.mapp.set_uniformTextures(self.ants_transform_direction_prog,
-                                          "mappTexture")
+                                          Mapp.mappDirection)
         for i, pheromone in enumerate(self.App.pheromone.pheromones,
                                       self.App.mapp.countTextures):
             self.App.set_uniform(self.ants_transform_direction_prog,
