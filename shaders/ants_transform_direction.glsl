@@ -20,7 +20,7 @@ float random() {
 void main() {
     vec2 _in_position = mod((in_position + 1) / 2, 1.) * 2 - 1;
 
-    float angel = random() * 6.28318530718;
+    float angel = random() * pi2;
     vec2 cos_sin = vec2(cos(angel), sin(angel));
     mat2 mat = mat2(vec2(cos_sin.x, -cos_sin.y), \
                     vec2(cos_sin.y, cos_sin.x));

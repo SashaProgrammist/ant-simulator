@@ -30,7 +30,8 @@ class Ants:
             vertex_shader='ants_transform_direction.glsl',
             varyings=["out_direction"])
 
-        self.App.set_uniform(self.ants_transform_direction_prog, "mappTexture", 0)
+        self.App.set_uniform(self.ants_transform_direction_prog,
+                             "mappTexture", self.App.mappTextureID)
 
         self.initAnts()
 

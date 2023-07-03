@@ -29,15 +29,17 @@ class App(mglw.WindowConfig):
 
         self.mapp_quad = geometry.quad_fs(self.attributeNames)
         self.mapp_texture = self.load_texture_2d("../mapp/mapp.png")
-        self.mapp_texture.use(location=0)
+        self.mappTextureID = 0
+        self.mapp_texture.use(location=self.mappTextureID)
         self.mapp_prog = self.load_program(
             vertex_shader='mapp_vertex_shader.glsl',
             fragment_shader='mapp_fragment_shader.glsl')
-        self.set_uniform(self.mapp_prog, "mappTexture", 0)
+        self.set_uniform(self.mapp_prog, "mappTexture", self.mappTextureID)
 
         self.ants = Ants(self, 100000, pointSize=5, startPosition=(-0.8, 0.8))
 
-        self.pheromone = Pheromone(self)
+        self.pheromone = Pheromone(self, isPheromoneWar=False,
+                                   weathering=0.99, redistribution=0.9)
 
         self.set_newResolution()
 
@@ -51,11 +53,12 @@ class App(mglw.WindowConfig):
         self.set_uniform(self.mapp_prog, "resolution", self.window_size)
         self.set_uniform(self.global_prog, "resolution", self.window_size)
         self.ants.set_newResolution()
+        self.pheromone.set_newResolution()
 
     def _render(self):
         self.mapp_quad.render(self.mapp_prog)
         self.global_quad.render(self.global_prog)
-        self.ants.render()
+        # self.ants.render()
         self.pheromone.render()
 
     def update(self, time, frame_time):
