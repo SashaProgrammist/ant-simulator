@@ -2,6 +2,7 @@ import moderngl as mgl
 import moderngl_window as mglw
 from moderngl_window import geometry
 from moderngl_window.opengl.vao import VAO
+
 from Ants import AntBufferInfo
 
 
@@ -11,8 +12,6 @@ class Pheromone:
 
     def __init__(self, App, pointSize=None, name=None, isPheromoneWar=False,
                  weathering=0.9, redistribution=0.1, redistributionRadius=10):
-        Pheromone.countPheromone += 1
-
         self.App = App
         if pointSize is not None:
             self.pointSize = pointSize
@@ -31,7 +30,7 @@ class Pheromone:
         self.redistributionRadius = redistributionRadius
 
         self.texture = self.App.ctx.texture(self.App.window_size, 2)
-        self.texture.use(Pheromone.countPheromone)
+        self.texture.use(Pheromone.countPheromone + self.App.mapp.countTextures)
 
         self.fbo = self.App.ctx.framebuffer(self.texture)
         self.fbo.use()
@@ -46,22 +45,22 @@ class Pheromone:
             vertex_shader="pheromone_display_ants_vertex_shader.glsl",
             fragment_shader="pheromone_display_ants_fragment_shader.glsl")
         self.App.set_uniform(self.displayAnts_prog, "isPheromoneWar", self.isPheromoneWar)
-        self.App.set_uniform(self.displayAnts_prog, "pheromone", Pheromone.countPheromone - 1)
+        self.App.set_uniform(self.displayAnts_prog, "pheromone", Pheromone.countPheromone)
 
         if not self.isPheromoneWar:
             self.pheromoneUpdate_prog = self.App.load_program(
                 vertex_shader="pheromone_update_vertex_shader.glsl",
                 fragment_shader="pheromone_update_fragment_shader.glsl")
-            self.App.set_uniform(self.pheromoneUpdate_prog, "mappTexture",
-                                 self.App.mappTextureID)
+            self.App.mapp.set_uniformTextures(self.pheromoneUpdate_prog, "mappTexture")
             self.App.set_uniform(self.pheromoneUpdate_prog, "pheromoneTexture",
-                                 Pheromone.countPheromone)
+                                 Pheromone.countPheromone + self.App.mapp.countTextures)
             self.updateWeatheringRedistribution(1, 1)
             self.App.set_uniform(self.pheromoneUpdate_prog, "redistributionRadius",
                                  self.redistributionRadius)
         else:
             self.pheromoneUpdate_prog = None
 
+        Pheromone.countPheromone += 1
         Pheromone.pheromones.append(self)
 
     def initAnts(self):

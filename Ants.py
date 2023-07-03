@@ -44,9 +44,10 @@ class Ants:
             vertex_shader='ants_transform_direction.glsl',
             varyings=["out_direction"])
 
-        self.App.set_uniform(self.ants_transform_direction_prog,
-                             "mappTexture", self.App.mappTextureID)
-        for i, pheromone in enumerate(self.App.pheromone.pheromones, 1):
+        self.App.mapp.set_uniformTextures(self.ants_transform_direction_prog,
+                                          "mappTexture")
+        for i, pheromone in enumerate(self.App.pheromone.pheromones,
+                                      self.App.mapp.countTextures):
             self.App.set_uniform(self.ants_transform_direction_prog,
                                  pheromone.name, i)
 
