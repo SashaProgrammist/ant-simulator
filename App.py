@@ -39,9 +39,12 @@ class App(mglw.WindowConfig):
         self.pheromone = Pheromone(self, isPheromoneWar=False,
                                    weathering=0.99, redistribution=0.9)
 
+        Pheromone.initPheromoneTextureInGLSL()
+
         self.ants = Ants(self, 100000, pointSize=5, startPosition=(-0., 0.))
 
-        self.pheromone.initAnts()
+        for pheromone in Pheromone.pheromones:
+            pheromone.initAnts()
 
         self.set_newResolution()
 

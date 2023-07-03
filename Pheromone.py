@@ -29,7 +29,7 @@ class Pheromone:
         self.weathering = weathering - redistribution
         self.redistribution = redistribution / 8
 
-        self.texture = self.App.ctx.texture(self.App.window_size, 2,)
+        self.texture = self.App.ctx.texture(self.App.window_size, 2)
         self.texture.use(Pheromone.countPheromone)
 
         self.fbo = self.App.ctx.framebuffer(self.texture)
@@ -83,3 +83,21 @@ class Pheromone:
         self.ants.render(self.displayAnts_prog)
 
         self.App.ctx.fbo.use()
+
+    @staticmethod
+    def initPheromoneTextureInGLSL():
+        with open("shaders/__pheromone_textures__.glsl", "w") as pheromone_textures:
+            for pheromone in Pheromone.pheromones:
+                pheromone_textures.write(f"uniform sampler2D {pheromone.name};\n")
+            pheromone_textures.write("\n")
+
+            pheromone_textures.write("sampler2D getPheromone(float id) {\n"
+                                     "    switch (int(id)) {\n")
+            for i, pheromone in enumerate(Pheromone.pheromones):
+                if i != len(Pheromone.pheromones) - 1:
+                    pheromone_textures.write(f"        case {i}:\n")
+                else:
+                    pheromone_textures.write(f"        default:\n")
+                pheromone_textures.write(f"            return {pheromone.name};\n")
+            pheromone_textures.write("    }\n"
+                                     "}\n")

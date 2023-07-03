@@ -1,5 +1,7 @@
 #version 400
 
+#include __pheromone_textures__.glsl
+
 #define pi 3.14159265359
 #define pi2 6.28318530718
 

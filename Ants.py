@@ -46,6 +46,9 @@ class Ants:
 
         self.App.set_uniform(self.ants_transform_direction_prog,
                              "mappTexture", self.App.mappTextureID)
+        for i, pheromone in enumerate(self.App.pheromone.pheromones, 1):
+            self.App.set_uniform(self.ants_transform_direction_prog,
+                                 pheromone.name, i)
 
         self.initAnts()
 
