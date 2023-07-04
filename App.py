@@ -3,13 +3,53 @@ import moderngl as mgl
 import moderngl_window as mglw
 from moderngl_window import geometry
 from moderngl_window.geometry.attributes import AttributeNames
-from PIL import Image
+from moderngl_window.opengl.vao import VAO
+import cv2
 import os
 import shutil
+import numpy as np
 
 from Ants import Ants
 from Pheromone import Pheromone
 from Mapp import Mapp
+
+
+def init(cls, self):
+    cls.ctx = self.ctx
+    cls.textureFbo = cls.ctx.texture(cls.window_size, 4)
+    cls.textureFbo.use(location=Mapp.countTextures + Pheromone.countPheromone)
+    cls.textureConvert = cls.ctx.texture(cls.window_size, 4)
+    cls.Convert = cls.ctx.framebuffer(cls.textureConvert)
+    cls.prog = cls.ctx.program(
+        vertex_shader="#version 400\n"
+                      "in vec3 in_position;\n"
+                      "in vec2 in_texCoord;\n"
+                      "out vec2 v_texCoord;\n"
+                      "void main() {\n"
+                      "    gl_Position = vec4(in_position, 1);\n"
+                      "    v_texCoord = in_texCoord;\n"
+                      "}\n",
+        fragment_shader="#version 400\n"
+                        "in vec2 v_texCoord;\n"
+                        "uniform sampler2D _textureFbo;\n"
+                        "out vec4 fragColor;\n"
+                        "void main() {\n"
+                        "    fragColor = vec4(texture(_textureFbo, v_texCoord * vec2(1, -1)).bgr, 1);\n"
+                        "}\n")
+    cls.prog["_textureFbo"] = Mapp.countTextures + Pheromone.countPheromone
+    cls.quad = geometry.quad_fs(cls.attributeNames)
+
+
+def delFolder(folder):
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 
 class App(mglw.WindowConfig):
@@ -21,33 +61,41 @@ class App(mglw.WindowConfig):
     cursor = True
     aspect_ratio = None
     attributeNames = AttributeNames(texcoord_0="in_texCoord")
-    indexFrame = None
+    indexFrame: int = None
+    ctx: mgl.Context = None
+    textureFbo: mgl.Texture = None
+    fbo: mgl.Framebuffer = None
+    textureConvert: mgl.Texture = None
+    Convert: mgl.Framebuffer = None
+    prog: mgl.Program = None
+    quad: VAO = None
 
     @classmethod
     def saveAnimation(cls):
         cls.indexFrame = 0
+        delFolder("animation")
 
         def render(self: cls, time, frame_time):
+            if cls.ctx is None:
+                init(cls, self)
+
             cls._render(self, time, frame_time)
 
+            cls.textureFbo.write(self.ctx.fbo.read(components=4, dtype='f1'))
+            cls.Convert.use()
+            cls.quad.render(cls.prog)
+            self.ctx.fbo.use()
+
             if cls.indexFrame % 2:
-                Image.frombytes('RGB', self.ctx.fbo.size,
-                                self.ctx.fbo.read(), 'raw',
-                                'RGB', 0, -1).save(f"animation/{cls.indexFrame // 2}.png")
+                path = f"animation/{cls.indexFrame // 2}.png"
+                raw = cls.Convert.read(components=4, dtype='f1')
+                buf: np.ndarray = np.frombuffer(raw, dtype='uint8'). \
+                    reshape((*self.ctx.fbo.size[1::-1], 4))
+                cv2.imwrite(path, buf)
+
             cls.indexFrame += 1
 
         cls.render = render
-
-        folder = "animation"
-        for filename in os.listdir(folder):
-            file_path = os.path.join(folder, filename)
-            try:
-                if os.path.isfile(file_path) or os.path.islink(file_path):
-                    os.unlink(file_path)
-                elif os.path.isdir(file_path):
-                    shutil.rmtree(file_path)
-            except Exception as e:
-                print('Failed to delete %s. Reason: %s' % (file_path, e))
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

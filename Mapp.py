@@ -18,18 +18,19 @@ class MappTexturesInfo:
 
 
 class Mapp:
+    countTextures = 0
+
     mappTexture = "mappTexture"
     mappDirection = "mappDirection"
 
     def __init__(self, App):
         self.App = App
-        self.countTextures = 0
 
         self.quad = geometry.quad_fs(self.App.attributeNames)
 
         self.textures: dict[str, MappTexturesInfo] = {}
         self.addTexture(Mapp.mappTexture, self.App.load_texture_2d("../mapp/mapp.png"))
-        self.addTexture(Mapp.mappDirection, self.App.ctx.texture(self.App.window_size, 2),)
+        self.addTexture(Mapp.mappDirection, self.App.ctx.texture(self.App.window_size, 2), )
 
         self.simple_prog = self.App.load_program(
             vertex_shader='mapp_simple_vertex_shader.glsl',
@@ -49,10 +50,10 @@ class Mapp:
         self.App.ctx.fbo.use()
 
     def addTexture(self, name, texture):
-        self.textures[name] = MappTexturesInfo(self.App, name, texture, self.countTextures)
+        self.textures[name] = MappTexturesInfo(self.App, name, texture, Mapp.countTextures)
         texture.use(location=self.textures[name].index)
 
-        self.countTextures += 1
+        Mapp.countTextures += 1
 
     def set_uniformTextures(self, prog, name):
         self.App.set_uniform(prog, name, self.textures[name].index)
