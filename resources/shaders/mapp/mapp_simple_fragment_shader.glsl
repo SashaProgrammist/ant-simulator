@@ -6,5 +6,5 @@ uniform vec2 resolution;
 out vec4 fragColor;
 
 void main() {
-    fragColor = vec4(texture(mappTexture, v_texCoord).rgb, 1);
+    fragColor = vec4(texture(mappTexture, v_texCoord).rrr, 1);
 }

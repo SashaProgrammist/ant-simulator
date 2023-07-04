@@ -125,17 +125,20 @@ class App(mglw.WindowConfig):
         self.test_prog = self.load_program(
             vertex_shader='shaders/test/test_vertex_shader.glsl',
             fragment_shader='shaders/test/test_fragment_shader.glsl')
-        self.set_uniform(self.test_prog, "_texture", 2)
+        self.set_uniform(self.test_prog, "_texture", 1)
+        self.set_uniform(self.test_prog, "pheromoneWar", 2)
+        self.set_uniform(self.test_prog, "pheromoneHome", 3)
+        self.set_uniform(self.test_prog, "pheromoneFood", 4)
 
         self.mapp = Mapp(self)
 
-        self.pheromone = Pheromone(self, isPheromoneWar=False,
-                                   weathering=0.99, redistribution=0.1,
-                                   redistributionRadius=5)
+        self.pheromoneWar = Pheromone(self, name="pheromoneWar", isPheromoneWar=True)
+        self.pheromoneHome = Pheromone(self, name="pheromoneHome")
+        self.pheromoneFood = Pheromone(self, name="pheromoneFood")
 
         Pheromone.initPheromoneTextureInGLSL()
 
-        self.ants = Ants(self, 100000, pointSize=5, startPosition=(-0., 0.))
+        self.ants = Ants(self, 100000, pointSize=5, startPosition=(-0.0, 0.0))
 
         for pheromone in Pheromone.pheromones:
             pheromone.initAnts()
@@ -152,20 +155,23 @@ class App(mglw.WindowConfig):
         self.mapp.set_newResolution()
         self.set_uniform(self.test_prog, "resolution", self.window_size)
         self.ants.set_newResolution()
-        self.pheromone.set_newResolution()
+        for pheromone in Pheromone.pheromones:
+            pheromone.set_newResolution()
 
     def renderVao(self):
         self.mapp.render()
         self.test_quad.render(self.test_prog)
-        # self.ants.render()
-        self.pheromone.render()
+        self.ants.render()
+        for pheromone in Pheromone.pheromones:
+            pheromone.render()
 
     def update(self, time, frame_time):
         self.ants.update(time, frame_time)
-        self.pheromone.update(time, frame_time)
+        for pheromone in Pheromone.pheromones:
+            pheromone.update(time, frame_time)
 
     def _render(self, time, frame_time):
-        if frame_time > 0.03:
+        if frame_time > 0.04:
             frame_time = 0
 
         self.ctx.clear()

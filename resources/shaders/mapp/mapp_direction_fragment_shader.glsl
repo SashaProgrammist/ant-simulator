@@ -27,7 +27,6 @@ void main() {
             mappDirection += -ovset * mapp / currentRadius * radius * 0.0004;
         }
     }
-    mappDirection *= 0.5;
     mappDirection += 0.5;
 
     fragColor = vec4(mappDirection, 0, 1);

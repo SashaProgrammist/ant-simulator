@@ -3,7 +3,6 @@ import moderngl_window as mglw
 from moderngl_window import geometry
 from moderngl_window.opengl.vao import VAO
 
-from Ants import AntBufferInfo
 from Mapp import Mapp
 
 
@@ -12,7 +11,7 @@ class Pheromone:
     pheromones = []
 
     def __init__(self, App, pointSize=None, name=None, isPheromoneWar=False,
-                 weathering=0.9, redistribution=0.1, redistributionRadius=10):
+                 weathering=0.9, redistribution=0.1, redistributionRadius=5):
         self.App = App
         if pointSize is not None:
             self.pointSize = pointSize
@@ -30,8 +29,11 @@ class Pheromone:
         self.redistribution = redistribution
         self.redistributionRadius = redistributionRadius
 
+        self.id = Pheromone.countPheromone
+
         self.texture = self.App.ctx.texture(self.App.window_size, 2)
-        self.texture.use(Pheromone.countPheromone + self.App.mapp.countTextures)
+        self.idTexture = Pheromone.countPheromone + self.App.mapp.countTextures
+        self.texture.use(self.idTexture)
 
         self.fbo = self.App.ctx.framebuffer(self.texture)
         self.fbo.use()
@@ -65,7 +67,7 @@ class Pheromone:
         Pheromone.pheromones.append(self)
 
     def initAnts(self):
-        buffers: list[AntBufferInfo] = self.App.ants.buffers
+        buffers = self.App.ants.buffers
         for buffer in buffers:
             self.ants.buffer(buffer.buffer, buffer.buffer_format, buffer.attributes)
 
@@ -109,13 +111,16 @@ class Pheromone:
                 pheromone_textures.write(f"uniform sampler2D {pheromone.name};\n")
             pheromone_textures.write("\n")
 
-            pheromone_textures.write("sampler2D getPheromone(float id) {\n"
+            pheromone_textures.write("vec2 getPheromone(float id, vec2 uv) {\n"
+                                     "    vec2 result = vec2(0.);\n"
                                      "    switch (int(id)) {\n")
             for i, pheromone in enumerate(Pheromone.pheromones):
                 if i != len(Pheromone.pheromones) - 1:
                     pheromone_textures.write(f"        case {i}:\n")
                 else:
                     pheromone_textures.write(f"        default:\n")
-                pheromone_textures.write(f"            return {pheromone.name};\n")
+                pheromone_textures.write(f"            result = (texture({pheromone.name},"
+                                         f" uv).rg - 0.5) * 2;\n")
             pheromone_textures.write("    }\n"
+                                     "    return result;\n"
                                      "}\n")

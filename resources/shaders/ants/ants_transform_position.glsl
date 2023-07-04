@@ -9,5 +9,5 @@ uniform float frame_time;
 out vec2 out_position;
 
 void main() {
-    out_position = in_position + in_direction * frame_time * in_speed;
+    out_position = in_position + in_direction * frame_time * in_speed * (0.95 - length(in_position));
 }

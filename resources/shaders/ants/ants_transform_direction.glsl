@@ -32,19 +32,12 @@ void main() {
 
     vec2 _mappDirection = texture(mappDirection, uv).rg;
     _mappDirection -= 0.5;
-    _mappDirection /= 0.5;
 
-    vec2 pheromoneDirection = \
-        normalize((texture(getPheromone(in_pheromoneControlIndex), uv).rg - 0.5) * 2);
-    angel = pi / 2;
-    cos_sin = vec2(cos(angel), sin(angel));
-    mat = mat2(vec2(cos_sin.x, -cos_sin.y), \
-               vec2(cos_sin.y, cos_sin.x));
-    pheromoneDirection = mat * pheromoneDirection;
+    vec2 pheromoneDirection = getPheromone(in_pheromoneControlIndex, uv);
 
     out_direction = normalize( \
-        in_direction + \
-        randomDirection * 0.1 + \
-        _mappDirection + \
-        pheromoneDirection * 0.5);
+        in_direction * 1 + \
+        randomDirection * 1 + \
+        _mappDirection * 1 + \
+        pheromoneDirection * 1);
 }

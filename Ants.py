@@ -4,6 +4,7 @@ import numpy as np
 import math
 
 from Mapp import Mapp
+from Pheromone import Pheromone
 
 
 class AntBufferInfo:
@@ -21,8 +22,8 @@ class AntBufferInfo:
 
 
 class Ants:
-    minSpeed = 0.2
-    maxSpeed = 0.3
+    minSpeed = 1
+    maxSpeed = 1.5
 
     def __init__(self, App, countAnt, pointSize=30, startPosition=(0, 0)):
         self.App = App
@@ -48,8 +49,8 @@ class Ants:
 
         self.App.mapp.set_uniformTextures(self.ants_transform_direction_prog,
                                           Mapp.mappDirection)
-        for i, pheromone in enumerate(self.App.pheromone.pheromones,
-                                      self.App.mapp.countTextures):
+        for i, pheromone in enumerate(Pheromone.pheromones,
+                                      Mapp.countTextures):
             self.App.set_uniform(self.ants_transform_direction_prog,
                                  pheromone.name, i)
 
@@ -88,12 +89,16 @@ class Ants:
         self.buffers.append(AntBufferInfo(
             self.ants.get_buffer_by_name("in_speed"), "1f"))
 
-        stackingPheromoneIndexData = np.array(np.zeros(self.countAnts), dtype=np.float32)
+        stackingPheromoneIndexData = \
+            np.array(np.array([self.App.pheromoneHome.id] * self.countAnts),
+                     dtype=np.float32)
         self.ants.buffer(stackingPheromoneIndexData, "1f", ["in_stackingPheromoneIndex"])
         self.buffers.append(AntBufferInfo(
             self.ants.get_buffer_by_name("in_stackingPheromoneIndex"), "1f"))
 
-        pheromoneControlIndexData = np.array(np.zeros(self.countAnts), dtype=np.float32)
+        pheromoneControlIndexData = \
+            np.array(np.array([self.App.pheromoneFood.id] * self.countAnts),
+                     dtype=np.float32)
         self.ants.buffer(pheromoneControlIndexData, "1f", ["in_pheromoneControlIndex"])
         self.buffers.append(AntBufferInfo(
             self.ants.get_buffer_by_name("in_pheromoneControlIndex"), "1f"))
