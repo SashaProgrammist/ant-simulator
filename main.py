@@ -1,5 +1,9 @@
 from App import *
 
+saveAnimation = True
+
 if __name__ == '__main__':
-    App.saveAnimation()
+    if saveAnimation:
+        App.saveAnimation(100)
+
     mglw.run_window_config(App)

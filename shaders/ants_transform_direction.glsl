@@ -46,5 +46,5 @@ void main() {
         in_direction + \
         randomDirection * 0.1 + \
         _mappDirection + \
-        pheromoneDirection * -0.1);
+        pheromoneDirection * 0.5);
 }
