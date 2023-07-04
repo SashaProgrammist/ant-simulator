@@ -53,6 +53,8 @@ class Ants:
                                       Mapp.countTextures):
             self.App.set_uniform(self.ants_transform_direction_prog,
                                  pheromone.name, i)
+        self.App.set_uniform(self.ants_transform_direction_prog,
+                             "sensitivityThreshold", 1.5 / 255)
 
         self.initAnts()
 

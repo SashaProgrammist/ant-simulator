@@ -12,9 +12,10 @@ in float in_pheromoneControlIndex;
 uniform float time;
 uniform float frame_time;
 uniform sampler2D mappDirection;
+uniform float sensitivityThreshold;
 out vec2 out_direction;
 
-float confusion = 0;
+float confusion = 1;
 float random() {
     confusion += 1;
     return fract(sin(confusion * time + frame_time) * cos(in_index) * 1000);
@@ -28,12 +29,18 @@ void main() {
     vec2 cos_sin = vec2(cos(angel), sin(angel));
     mat2 mat = mat2(vec2(cos_sin.x, -cos_sin.y), \
                     vec2(cos_sin.y, cos_sin.x));
-    vec2 randomDirection = mat * in_direction;
+    vec2 randomDirection = mat * in_direction * (1 + random()) / 2;
 
     vec2 _mappDirection = texture(mappDirection, uv).rg;
     _mappDirection -= 0.5;
+    if (length(_mappDirection) < sensitivityThreshold) {
+        _mappDirection = vec2(0);
+    }
 
     vec2 pheromoneDirection = getPheromone(in_pheromoneControlIndex, uv);
+    if (length(pheromoneDirection) < sensitivityThreshold) {
+        pheromoneDirection = vec2(0);
+    }
 
     out_direction = normalize( \
         in_direction * 1 + \
