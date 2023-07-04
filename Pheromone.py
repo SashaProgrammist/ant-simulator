@@ -36,9 +36,10 @@ class Pheromone:
         self.texture.use(self.idTexture)
 
         self.fbo = self.App.ctx.framebuffer(self.texture)
-        self.fbo.use()
-        self.App.ctx.clear(0.5, 0.5)
-        self.App.ctx.fbo.use()
+        if not self.isPheromoneWar:
+            self.fbo.use()
+            self.App.ctx.clear(0.5, 0.5)
+            self.App.ctx.fbo.use()
 
         self.ants: VAO = VAO(self.name, mode=mgl.POINTS)
 
@@ -55,12 +56,18 @@ class Pheromone:
                 vertex_shader="shaders/pheromone/pheromone_update_vertex_shader.glsl",
                 fragment_shader="shaders/pheromone/pheromone_update_fragment_shader.glsl")
             self.App.mapp.set_uniformTextures(self.pheromoneUpdate_prog, Mapp.mappTexture)
-            self.App.set_uniform(self.pheromoneUpdate_prog, "pheromoneTexture",
-                                 Pheromone.countPheromone + self.App.mapp.countTextures)
+            self.App.set_uniform(self.pheromoneUpdate_prog, "pheromoneTexture", self.idTexture)
             self.updateWeatheringRedistribution(1, 1)
             self.App.set_uniform(self.pheromoneUpdate_prog, "redistributionRadius",
                                  self.redistributionRadius)
+
+            self.pheromoneWar_prog = None
         else:
+            self.pheromoneWar_prog = self.App.load_program(
+                vertex_shader="shaders/pheromone/pheromone_war_vertex_shader.glsl",
+                fragment_shader="shaders/pheromone/pheromone_war_fragment_shader.glsl")
+            self.App.set_uniform(self.pheromoneWar_prog, "pheromone", self.idTexture)
+
             self.pheromoneUpdate_prog = None
 
         Pheromone.countPheromone += 1
@@ -95,6 +102,9 @@ class Pheromone:
             self.updateWeatheringRedistribution(frame_time)
 
     def render(self):
+        if self.isPheromoneWar:
+            self.fullScreen.render(self.pheromoneWar_prog)
+
         self.fbo.use()
 
         if not self.isPheromoneWar:

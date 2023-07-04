@@ -125,7 +125,7 @@ class App(mglw.WindowConfig):
         self.deBag_prog = self.load_program(
             vertex_shader='shaders/deBag/deBag_vertex_shader.glsl',
             fragment_shader='shaders/deBag/deBag_fragment_shader.glsl')
-        self.set_uniform(self.deBag_prog, "_texture", 3)
+        self.set_uniform(self.deBag_prog, "_texture", 2)
 
         self.mapp = Mapp(self)
 
