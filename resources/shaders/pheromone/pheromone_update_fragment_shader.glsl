@@ -24,6 +24,7 @@ void main() {
             }
         }
     }
+
     color += 0.5;
 
     fragColor = vec4(color, 1);

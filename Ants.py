@@ -22,8 +22,8 @@ class AntBufferInfo:
 
 
 class Ants:
-    minSpeed = 1
-    maxSpeed = 1.5
+    minSpeed = 0.2
+    maxSpeed = 0.3
 
     def __init__(self, App, countAnt, pointSize=30, startPosition=(0, 0)):
         self.App = App
@@ -92,15 +92,13 @@ class Ants:
             self.ants.get_buffer_by_name("in_speed"), "1f"))
 
         stackingPheromoneIndexData = \
-            np.array(np.array([self.App.pheromoneHome.id] * self.countAnts),
-                     dtype=np.float32)
+            np.array([self.App.pheromoneHome.id] * self.countAnts, dtype=np.float32)
         self.ants.buffer(stackingPheromoneIndexData, "1f", ["in_stackingPheromoneIndex"])
         self.buffers.append(AntBufferInfo(
             self.ants.get_buffer_by_name("in_stackingPheromoneIndex"), "1f"))
 
         pheromoneControlIndexData = \
-            np.array(np.array([self.App.pheromoneFood.id] * self.countAnts),
-                     dtype=np.float32)
+            np.array([self.App.pheromoneHome.id] * self.countAnts, dtype=np.float32)
         self.ants.buffer(pheromoneControlIndexData, "1f", ["in_pheromoneControlIndex"])
         self.buffers.append(AntBufferInfo(
             self.ants.get_buffer_by_name("in_pheromoneControlIndex"), "1f"))

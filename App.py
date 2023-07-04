@@ -121,14 +121,11 @@ class App(mglw.WindowConfig):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.test_quad = geometry.quad_fs(self.attributeNames)
-        self.test_prog = self.load_program(
-            vertex_shader='shaders/test/test_vertex_shader.glsl',
-            fragment_shader='shaders/test/test_fragment_shader.glsl')
-        self.set_uniform(self.test_prog, "_texture", 1)
-        self.set_uniform(self.test_prog, "pheromoneWar", 2)
-        self.set_uniform(self.test_prog, "pheromoneHome", 3)
-        self.set_uniform(self.test_prog, "pheromoneFood", 4)
+        self.deBag_quad = geometry.quad_fs(self.attributeNames)
+        self.deBag_prog = self.load_program(
+            vertex_shader='shaders/deBag/deBag_vertex_shader.glsl',
+            fragment_shader='shaders/deBag/deBag_fragment_shader.glsl')
+        self.set_uniform(self.deBag_prog, "_texture", 3)
 
         self.mapp = Mapp(self)
 
@@ -138,7 +135,7 @@ class App(mglw.WindowConfig):
 
         Pheromone.initPheromoneTextureInGLSL()
 
-        self.ants = Ants(self, 100000, pointSize=5, startPosition=(-0.0, 0.0))
+        self.ants = Ants(self, 100000, pointSize=5, startPosition=(-0.8, 0.8))
 
         for pheromone in Pheromone.pheromones:
             pheromone.initAnts()
@@ -153,14 +150,14 @@ class App(mglw.WindowConfig):
 
     def set_newResolution(self):
         self.mapp.set_newResolution()
-        self.set_uniform(self.test_prog, "resolution", self.window_size)
+        self.set_uniform(self.deBag_prog, "resolution", self.window_size)
         self.ants.set_newResolution()
         for pheromone in Pheromone.pheromones:
             pheromone.set_newResolution()
 
     def renderVao(self):
         self.mapp.render()
-        self.test_quad.render(self.test_prog)
+        self.deBag_quad.render(self.deBag_prog)
         self.ants.render()
         for pheromone in Pheromone.pheromones:
             pheromone.render()

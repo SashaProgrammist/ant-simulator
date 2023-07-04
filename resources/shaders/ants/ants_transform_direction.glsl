@@ -44,7 +44,7 @@ void main() {
 
     out_direction = normalize( \
         in_direction * 1 + \
-        randomDirection * 1 + \
-        _mappDirection * 1 + \
-        pheromoneDirection * 1);
+        randomDirection * 0.2 + \
+        _mappDirection * 3 + \
+        pheromoneDirection * -0.4);
 }

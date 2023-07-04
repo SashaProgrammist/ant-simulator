@@ -11,7 +11,7 @@ class Pheromone:
     pheromones = []
 
     def __init__(self, App, pointSize=None, name=None, isPheromoneWar=False,
-                 weathering=0.9, redistribution=0.1, redistributionRadius=5):
+                 weathering=0.99, redistribution=0.9, redistributionRadius=2):
         self.App = App
         if pointSize is not None:
             self.pointSize = pointSize
@@ -31,7 +31,7 @@ class Pheromone:
 
         self.id = Pheromone.countPheromone
 
-        self.texture = self.App.ctx.texture(self.App.window_size, 2)
+        self.texture = self.App.ctx.texture(self.App.window_size, 2, dtype="f1")
         self.idTexture = Pheromone.countPheromone + self.App.mapp.countTextures
         self.texture.use(self.idTexture)
 
@@ -112,13 +112,14 @@ class Pheromone:
             pheromone_textures.write("\n")
 
             pheromone_textures.write("vec2 getPheromone(float id, vec2 uv) {\n"
-                                     "    vec2 result = vec2(0.);\n"
-                                     "    switch (int(id)) {\n")
+                                     "    vec2 result = vec2(0.);\n")
             for i, pheromone in enumerate(Pheromone.pheromones):
-                if i != len(Pheromone.pheromones) - 1:
-                    pheromone_textures.write(f"        case {i}:\n")
+                if not i:
+                    pheromone_textures.write(f"    if (int(id) == {i}) ""{\n")
+                elif i != len(Pheromone.pheromones) - 1:
+                    pheromone_textures.write("    }"f" else if (int(id) == {i}) ""{\n")
                 else:
-                    pheromone_textures.write(f"        default:\n")
+                    pheromone_textures.write("    } else {\n")
                 pheromone_textures.write(f"            result = (texture({pheromone.name},"
                                          f" uv).rg - 0.5) * 2;\n")
             pheromone_textures.write("    }\n"

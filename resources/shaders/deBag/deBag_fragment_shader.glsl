@@ -1,6 +1,6 @@
 #version 400
 
-#include shaders/ants/__pheromone_textures__.glsl
+//#include shaders/ants/__pheromone_textures__.glsl
 
 in vec2 v_texCoord;
 in vec2 v_position;
