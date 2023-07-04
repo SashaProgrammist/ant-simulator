@@ -43,15 +43,15 @@ class Pheromone:
         self.fullScreen = geometry.quad_fs(self.App.attributeNames)
 
         self.displayAnts_prog = self.App.load_program(
-            vertex_shader="pheromone_display_ants_vertex_shader.glsl",
-            fragment_shader="pheromone_display_ants_fragment_shader.glsl")
+            vertex_shader="shaders/pheromone/pheromone_display_ants_vertex_shader.glsl",
+            fragment_shader="shaders/pheromone/pheromone_display_ants_fragment_shader.glsl")
         self.App.set_uniform(self.displayAnts_prog, "isPheromoneWar", self.isPheromoneWar)
         self.App.set_uniform(self.displayAnts_prog, "pheromone", Pheromone.countPheromone)
 
         if not self.isPheromoneWar:
             self.pheromoneUpdate_prog = self.App.load_program(
-                vertex_shader="pheromone_update_vertex_shader.glsl",
-                fragment_shader="pheromone_update_fragment_shader.glsl")
+                vertex_shader="shaders/pheromone/pheromone_update_vertex_shader.glsl",
+                fragment_shader="shaders/pheromone/pheromone_update_fragment_shader.glsl")
             self.App.mapp.set_uniformTextures(self.pheromoneUpdate_prog, Mapp.mappTexture)
             self.App.set_uniform(self.pheromoneUpdate_prog, "pheromoneTexture",
                                  Pheromone.countPheromone + self.App.mapp.countTextures)
@@ -104,7 +104,7 @@ class Pheromone:
 
     @staticmethod
     def initPheromoneTextureInGLSL():
-        with open("shaders/__pheromone_textures__.glsl", "w") as pheromone_textures:
+        with open("resources/shaders/ants/__pheromone_textures__.glsl", "w") as pheromone_textures:
             for pheromone in Pheromone.pheromones:
                 pheromone_textures.write(f"uniform sampler2D {pheromone.name};\n")
             pheromone_textures.write("\n")

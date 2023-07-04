@@ -36,14 +36,14 @@ class Ants:
             reserve=self.countAnts * 2 * 4)
 
         self.ants_graphic_prog = self.App.load_program(
-            vertex_shader='ants_vertex_shader.glsl',
-            fragment_shader='ants_fragment_shader.glsl')
+            vertex_shader='shaders/ants/ants_vertex_shader.glsl',
+            fragment_shader='shaders/ants/ants_fragment_shader.glsl')
 
         self.ants_transform_position_prog = self.App.load_program(
-            vertex_shader='ants_transform_position.glsl',
+            vertex_shader='shaders/ants/ants_transform_position.glsl',
             varyings=["out_position"])
         self.ants_transform_direction_prog = self.App.load_program(
-            vertex_shader='ants_transform_direction.glsl',
+            vertex_shader='shaders/ants/ants_transform_direction.glsl',
             varyings=["out_direction"])
 
         self.App.mapp.set_uniformTextures(self.ants_transform_direction_prog,

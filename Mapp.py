@@ -29,17 +29,17 @@ class Mapp:
         self.quad = geometry.quad_fs(self.App.attributeNames)
 
         self.textures: dict[str, MappTexturesInfo] = {}
-        self.addTexture(Mapp.mappTexture, self.App.load_texture_2d("../mapp/mapp.png"))
+        self.addTexture(Mapp.mappTexture, self.App.load_texture_2d("mapp/mapp.png"))
         self.addTexture(Mapp.mappDirection, self.App.ctx.texture(self.App.window_size, 2), )
 
         self.simple_prog = self.App.load_program(
-            vertex_shader='mapp_simple_vertex_shader.glsl',
-            fragment_shader='mapp_simple_fragment_shader.glsl')
+            vertex_shader='shaders/mapp/mapp_simple_vertex_shader.glsl',
+            fragment_shader='shaders/mapp/mapp_simple_fragment_shader.glsl')
         self.set_uniformTextures(self.simple_prog, Mapp.mappTexture)
 
         self.mappDirection_prog = self.App.load_program(
-            vertex_shader='mapp_direction_vertex_shader.glsl',
-            fragment_shader='mapp_direction_fragment_shader.glsl')
+            vertex_shader='shaders/mapp/mapp_direction_vertex_shader.glsl',
+            fragment_shader='shaders/mapp/mapp_direction_fragment_shader.glsl')
         self.set_uniformTextures(self.mappDirection_prog, Mapp.mappTexture)
 
         self.applyChangeMappTexture()

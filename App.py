@@ -40,7 +40,7 @@ def sequenceToVideo(image_folder, video_name):
 class App(mglw.WindowConfig):
     log_level = logging.INFO
     window_size = 1600, 900
-    resource_dir = 'shaders'
+    resource_dir = 'resources'
     fullscreen = False
     title = "ant simulator"
     cursor = True
@@ -87,7 +87,7 @@ class App(mglw.WindowConfig):
     def saveAnimation(cls, countFrame=None, name=None):
         cls.indexFrame = 0
         cls.countFrame = countFrame
-        delFolder("animation")
+        delFolder("animation/animationTemp")
 
         def render(self: cls, *_):
             if cls.ctx is None:
@@ -100,7 +100,7 @@ class App(mglw.WindowConfig):
             cls.quad.render(cls.prog)
             self.ctx.fbo.use()
 
-            path = f"animation/{'0' * (len(str(cls.countFrame)) - len(str(cls.indexFrame)))}" \
+            path = f"animation/animationTemp/{'0' * (len(str(cls.countFrame)) - len(str(cls.indexFrame)))}" \
                    f"{cls.indexFrame}.png"
             raw = cls.Convert.read(components=4, dtype='f1')
             buf: np.ndarray = np.frombuffer(raw, dtype='uint8'). \
@@ -112,19 +112,20 @@ class App(mglw.WindowConfig):
             if cls.countFrame is not None and cls.indexFrame >= cls.countFrame:
                 self.wnd.is_closing = True
 
-                sequenceToVideo("animation",
-                                f'saveAnimation/{cls.countFrame if name is None else name}.avi')
+                sequenceToVideo("animation/animationTemp",
+                                f'animation/saveAnimation/'
+                                f'{cls.countFrame if name is None else name}.avi')
 
         cls.render = render
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.global_quad = geometry.quad_fs(self.attributeNames)
-        self.global_prog = self.load_program(
-            vertex_shader='global_vertex_shader.glsl',
-            fragment_shader='global_fragment_shader.glsl')
-        self.set_uniform(self.global_prog, "_texture", 2)
+        self.test_quad = geometry.quad_fs(self.attributeNames)
+        self.test_prog = self.load_program(
+            vertex_shader='shaders/test/test_vertex_shader.glsl',
+            fragment_shader='shaders/test/test_fragment_shader.glsl')
+        self.set_uniform(self.test_prog, "_texture", 2)
 
         self.mapp = Mapp(self)
 
@@ -149,13 +150,13 @@ class App(mglw.WindowConfig):
 
     def set_newResolution(self):
         self.mapp.set_newResolution()
-        self.set_uniform(self.global_prog, "resolution", self.window_size)
+        self.set_uniform(self.test_prog, "resolution", self.window_size)
         self.ants.set_newResolution()
         self.pheromone.set_newResolution()
 
     def renderVao(self):
         self.mapp.render()
-        self.global_quad.render(self.global_prog)
+        self.test_quad.render(self.test_prog)
         # self.ants.render()
         self.pheromone.render()
 
