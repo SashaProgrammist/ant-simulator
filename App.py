@@ -4,6 +4,8 @@ import moderngl_window as mglw
 from moderngl_window import geometry
 from moderngl_window.geometry.attributes import AttributeNames
 from moderngl_window.opengl.vao import VAO
+from moderngl_window.context.base.window import logger
+from moderngl_window.timers.clock import Timer
 import cv2
 import os
 import shutil
@@ -26,17 +28,6 @@ def delFolder(folder):
             print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 
-def sequenceToVideo(image_folder, video_name):
-    images = [img for img in os.listdir(image_folder) if img.endswith(".png")]
-    frame = cv2.imread(os.path.join(image_folder, images[0]))
-    height, width, layers = frame.shape
-    video = cv2.VideoWriter(video_name, cv2.VideoWriter_fourcc(*'mp4v'), 60, (width, height))
-    for image in images:
-        video.write(cv2.imread(os.path.join(image_folder, image)))
-    cv2.destroyAllWindows()
-    video.release()
-
-
 class App(mglw.WindowConfig):
     log_level = logging.INFO
     window_size = 1600, 900
@@ -46,21 +37,45 @@ class App(mglw.WindowConfig):
     cursor = True
     aspect_ratio = None
     attributeNames = AttributeNames(texcoord_0="in_texCoord")
-    indexFrame: int = None
-    countFrame: int = None
-    ctx: mgl.Context = None
-    textureFbo: mgl.Texture = None
-    fbo: mgl.Framebuffer = None
-    textureConvert: mgl.Texture = None
-    Convert: mgl.Framebuffer = None
-    prog: mgl.Program = None
-    quad: VAO = None
+    clear_color = (1, 1, 1)
+    vsync = True
+
+    indexFrame: int
+    indexSimFrame: int
+    countFrame: int
+    fps: float
+    framesSim: int
+    isSaveSequence: bool
+    fpsSim: float
+    video: cv2.VideoWriter
+    ctx: mgl.Context
+    textureFbo: mgl.Texture
+    textureFboId: int
+    fbo: mgl.Framebuffer
+    textureConvert: mgl.Texture
+    Convert: mgl.Framebuffer
+    prog: mgl.Program
+    quad: VAO
+    buffers: list[np.ndarray]
 
     @classmethod
-    def initBuffersForSaveImage(cls, self):
+    def initSaveAnimation(cls, self, countFrame, name,
+                          fps, fpsSim, invisibleFrames, isSaveSequence):
+        cls.indexFrame = 0
+        cls.indexSimFrame = 0
+        cls.countFrame = countFrame
+        cls.fps = fps
+        cls.framesSim = invisibleFrames + 1
+        cls.isSaveSequence = isSaveSequence
+        cls.fpsSim = fpsSim
+        cls.video = cv2.VideoWriter(
+            f'animation/saveAnimation/{name}.avi',
+            cv2.VideoWriter_fourcc(*'mp4v'), cls.fps,
+            cls.window_size)
         cls.ctx = self.ctx
         cls.textureFbo = cls.ctx.texture(cls.window_size, 4, dtype="f1")
-        cls.textureFbo.use(location=Mapp.countTextures + Pheromone.countPheromone)
+        cls.textureFboId = Mapp.countTextures + Pheromone.countPheromone
+        cls.textureFbo.use(location=cls.textureFboId)
         cls.textureConvert = cls.ctx.texture(cls.window_size, 4)
         cls.Convert = cls.ctx.framebuffer(cls.textureConvert)
         cls.prog = cls.ctx.program(
@@ -82,47 +97,80 @@ class App(mglw.WindowConfig):
                             "}\n")
         cls.prog["_textureFbo"] = Mapp.countTextures + Pheromone.countPheromone
         cls.quad = self.fullScreen
+        cls.buffers = []
 
     @classmethod
-    def saveAnimation(cls, countFrame=None, name=None):
-        cls.indexFrame = 0
-        cls.countFrame = countFrame
-        delFolder("animation/animationTemp")
+    def saveAnimation(cls, countFrame=None, name=None,
+                      fps=20., fpsSim=60, invisibleFrames=2,
+                      isSaveSequence=False):
+        cls.vsync = False
 
-        def render(self: cls, *_):
-            if cls.ctx is None:
-                cls.initBuffersForSaveImage(self)
+        if isSaveSequence:
+            delFolder("animation/animationTemp")
 
-            cls._render(self, cls.indexFrame / 60, 1 / 60)
+        def render(self: cls, *args):
+            if not hasattr(cls, "indexFrame"):
+                cls.initSaveAnimation(
+                    self, countFrame,
+                    str(countFrame) if name is None else name,
+                    fps, fpsSim, invisibleFrames, isSaveSequence)
 
-            cls.textureFbo.write(self.ctx.fbo.read(components=4, dtype='f1'))
+            time, frameTime = cls.indexSimFrame / cls.fpsSim, 1 / cls.fpsSim
+            self.ctx.clear()
+            for i in range(cls.framesSim):
+                self.update(time, frameTime)
+                cls.indexSimFrame += 1
+                time = cls.indexSimFrame / cls.fpsSim
+
+            self.renderVao()
+
+            cls.textureFbo.write(self.ctx.fbo.read(components=4))
             cls.Convert.use()
             cls.quad.render(cls.prog)
             self.mainFbo.use()
 
-            path = f"animation/animationTemp/" + \
-                   '0' * (len(str(cls.countFrame)) - len(str(cls.indexFrame))) + \
-                   f"{cls.indexFrame}.png"
-            raw = cls.Convert.read(components=4, dtype='f1')
+            raw = cls.Convert.read(components=3, dtype='f1')
             buf: np.ndarray = np.frombuffer(raw, dtype='uint8'). \
-                reshape((*self.ctx.fbo.size[1::-1], 4))
-            cv2.imwrite(path, buf)
+                reshape((*self.ctx.fbo.size[1::-1], 3))
+            cls.buffers.append(buf)
 
-            cls.indexFrame += 1
+            if cls.isSaveSequence:
+                path = f"animation/animationTemp/" + \
+                       '0' * (len(str(cls.countFrame // cls.framesSim)) -
+                              len(str(cls.indexFrame))) + \
+                       f"{cls.indexFrame}.png"
+                cv2.imwrite(path, buf)
+
+            cls.video.write(buf)
 
             if cls.countFrame is not None and cls.indexFrame >= cls.countFrame:
                 self.wnd.is_closing = True
 
-                sequenceToVideo("animation/animationTemp",
-                                f'animation/saveAnimation/'
-                                f'{cls.countFrame if name is None else name}.avi')
+                cls.video.release()
+
+                unitTimes = [60, 60, 24, 30, 12]
+                unitTimesNames = ["m", "h", "d", "m", "e"]
+                i = 0
+                time = self.timer.time
+                timeSim = cls.indexSimFrame / cls.fpsSim
+                unitTime = "s"
+                while i < len(unitTimes) and timeSim >= unitTimes[i]:
+                    timeSim /= unitTimes[i]
+                    unitTime = unitTimesNames[i]
+
+                logger.info(f"Duration in sim: {timeSim} {unitTime} @ "
+                            f"{cls.indexFrame / time * cls.framesSim} ups")
+
+            cls.indexFrame += 1
 
         cls.render = render
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.mainFbo = self.ctx.fbo
+        self.timer: Timer = kwargs["timer"]
+
+        self.mainFbo = self.wnd.fbo
         self.fullScreen = geometry.quad_fs(self.attributeNames)
 
         self.deBag_prog = self.load_program(

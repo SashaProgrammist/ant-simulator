@@ -129,10 +129,6 @@ class Pheromone:
         if not self.isPheromoneWar:
             self.updateWeatheringRedistribution(frame_time)
 
-    def render(self):
-        if self.isPheromoneWar:
-            self.fullScreen.render(self.pheromoneWar_prog)
-
         self.fbo.use()
 
         if not self.isPheromoneWar:
@@ -141,6 +137,10 @@ class Pheromone:
         self.ants.render(self.displayAnts_prog)
 
         self.App.mainFbo.use()
+
+    def render(self):
+        if self.isPheromoneWar:
+            self.fullScreen.render(self.pheromoneWar_prog)
 
     @staticmethod
     def initPheromoneTextureInGLSL():
