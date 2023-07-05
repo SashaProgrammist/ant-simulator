@@ -10,16 +10,17 @@ class Pheromone:
     countPheromone = 0
     pheromones = []
 
-    def __init__(self, App, pointSize=None, name=None, isPheromoneWar=False,
+    def __init__(self, App, windowSkele=0.5, pointSize=None, name=None, isPheromoneWar=False,
                  weathering=0.99, redistribution=0.9, redistributionRadius=2):
         self.App = App
+        self.windowSkele = windowSkele
         if pointSize is not None:
             self.pointSize = pointSize
         else:
             if isPheromoneWar:
-                self.pointSize = 50
+                self.pointSize = 25
             else:
-                self.pointSize = 5
+                self.pointSize = 3
         if name is not None:
             self.name = name
         else:
@@ -31,11 +32,14 @@ class Pheromone:
 
         self.id = Pheromone.countPheromone
 
-        self.texture = self.App.ctx.texture(self.App.window_size, 2, dtype="f1")
+        self.windowSize = tuple(int(size * self.windowSkele) for size in self.App.window_size)
+        self.texture: mgl.Texture = self.App.ctx.texture(
+            self.windowSize,
+            2, dtype="f1")
         self.idTexture = Pheromone.countPheromone + self.App.mapp.countTextures
         self.texture.use(self.idTexture)
 
-        self.fbo = self.App.ctx.framebuffer(self.texture)
+        self.fbo: mgl.Framebuffer = self.App.ctx.framebuffer(self.texture)
         if not self.isPheromoneWar:
             self.fbo.use()
             self.App.ctx.clear(0.5, 0.5)
@@ -43,7 +47,7 @@ class Pheromone:
 
         self.ants: VAO = VAO(self.name, mode=mgl.POINTS)
 
-        self.fullScreen = geometry.quad_fs(self.App.attributeNames)
+        self.fullScreen = self.App.fullScreen
 
         self.displayAnts_prog = self.App.load_program(
             vertex_shader="shaders/pheromone/pheromone_display_ants_vertex_shader.glsl",
@@ -79,9 +83,33 @@ class Pheromone:
             self.ants.buffer(buffer.buffer, buffer.buffer_format, buffer.attributes)
 
     def set_newResolution(self):
-        self.App.set_uniform(self.displayAnts_prog, "resolution", self.App.window_size)
+        newWindowSize = tuple(int(size * self.windowSkele) for size in self.App.window_size)
+
+        if newWindowSize != self.windowSize:
+            newTexture = self.App.ctx.texture(
+                tuple(int(size * self.windowSkele) for size in self.App.window_size),
+                2, dtype="f1")
+            newFbo = self.App.ctx.framebuffer(newTexture)
+            newFbo.use()
+
+            self.App.display(self.idTexture)
+
+            self.fbo.release()
+            self.texture.release()
+
+            self.windowSize = newWindowSize
+            self.fbo = newFbo
+            self.texture = newTexture
+            newTexture.use(self.idTexture)
+
+            self.App.ctx.fbo.use()
+
+        self.App.set_uniform(self.displayAnts_prog, "resolution",
+                             tuple(int(size * self.windowSkele)
+                                   for size in self.App.window_size))
         if not self.isPheromoneWar:
-            self.App.set_uniform(self.pheromoneUpdate_prog, "resolution", self.App.window_size)
+            self.App.set_uniform(self.pheromoneUpdate_prog, "resolution",
+                                 self.App.window_size)
 
     def updateWeatheringRedistribution(self, frame_time, timeScale=0.1):
         frame_time /= timeScale

@@ -81,7 +81,7 @@ class App(mglw.WindowConfig):
                             "vec4(texture(_textureFbo, v_texCoord * vec2(1, -1)).bgr, 1);\n"
                             "}\n")
         cls.prog["_textureFbo"] = Mapp.countTextures + Pheromone.countPheromone
-        cls.quad = geometry.quad_fs(cls.attributeNames)
+        cls.quad = self.fullScreen
 
     @classmethod
     def saveAnimation(cls, countFrame=None, name=None):
@@ -100,7 +100,8 @@ class App(mglw.WindowConfig):
             cls.quad.render(cls.prog)
             self.ctx.fbo.use()
 
-            path = f"animation/animationTemp/{'0' * (len(str(cls.countFrame)) - len(str(cls.indexFrame)))}" \
+            path = f"animation/animationTemp/" + \
+                   '0' * (len(str(cls.countFrame)) - len(str(cls.indexFrame))) + \
                    f"{cls.indexFrame}.png"
             raw = cls.Convert.read(components=4, dtype='f1')
             buf: np.ndarray = np.frombuffer(raw, dtype='uint8'). \
@@ -121,11 +122,16 @@ class App(mglw.WindowConfig):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.deBag_quad = geometry.quad_fs(self.attributeNames)
+        self.fullScreen = geometry.quad_fs(self.attributeNames)
+
         self.deBag_prog = self.load_program(
             vertex_shader='shaders/deBag/deBag_vertex_shader.glsl',
             fragment_shader='shaders/deBag/deBag_fragment_shader.glsl')
         self.set_uniform(self.deBag_prog, "_texture", 2)
+
+        self.display_prog = self.load_program(
+            vertex_shader='shaders/display/display_vertex_shader.glsl',
+            fragment_shader='shaders/display/display_fragment_shader.glsl')
 
         self.mapp = Mapp(self)
 
@@ -144,6 +150,10 @@ class App(mglw.WindowConfig):
 
         self.ctx.enable(mgl.BLEND)
 
+    def display(self, idTexture):
+        self.set_uniform(self.display_prog, "_texture", idTexture)
+        self.fullScreen.render(self.display_prog)
+
     def resize(self, width: int, height: int):
         self.window_size = width, height
         self.set_newResolution()
@@ -157,7 +167,7 @@ class App(mglw.WindowConfig):
 
     def renderVao(self):
         self.mapp.render()
-        self.deBag_quad.render(self.deBag_prog)
+        self.fullScreen.render(self.deBag_prog)
         self.ants.render()
         for pheromone in Pheromone.pheromones:
             pheromone.render()
@@ -168,7 +178,7 @@ class App(mglw.WindowConfig):
             pheromone.update(time, frame_time)
 
     def _render(self, time, frame_time):
-        if frame_time > 0.04:
+        if frame_time > 0.02:
             frame_time = 0
 
         self.ctx.clear()

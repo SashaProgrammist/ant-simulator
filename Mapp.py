@@ -26,7 +26,7 @@ class Mapp:
     def __init__(self, App):
         self.App = App
 
-        self.quad = geometry.quad_fs(self.App.attributeNames)
+        self.quad = self.App.fullScreen
 
         self.textures: dict[str, MappTexturesInfo] = {}
         self.addTexture(Mapp.mappTexture, self.App.load_texture_2d("mapp/mapp.png"))
