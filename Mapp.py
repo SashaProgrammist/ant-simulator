@@ -47,7 +47,7 @@ class Mapp:
     def applyChangeMappTexture(self):
         self.textures[Mapp.mappDirection].fbo.use()
         self.quad.render(self.mappDirection_prog)
-        self.App.ctx.fbo.use()
+        self.App.mainFbo.use()
 
     def addTexture(self, name, texture):
         self.textures[name] = MappTexturesInfo(self.App, name, texture, Mapp.countTextures)

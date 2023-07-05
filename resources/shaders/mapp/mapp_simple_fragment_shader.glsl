@@ -7,9 +7,9 @@ out vec4 fragColor;
 
 void main() {
     vec4 color = texture(mappTexture, v_texCoord);
-    
-//    temp
     fragColor = vec4(color.rrr, 1);
-    if (color.g > 0.5)
-        fragColor = vec4(0, 1, 0, 1);
+
+//    temp
+//    if (color.g > 0.5)
+//        fragColor = vec4(0, 1, 0, 1);
 }

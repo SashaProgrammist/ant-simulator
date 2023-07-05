@@ -43,7 +43,7 @@ class Pheromone:
         if not self.isPheromoneWar:
             self.fbo.use()
             self.App.ctx.clear(0.5, 0.5)
-            self.App.ctx.fbo.use()
+            self.App.mainFbo.use()
 
         self.ants: VAO = VAO(self.name, mode=mgl.POINTS)
 
@@ -102,7 +102,7 @@ class Pheromone:
             self.texture = newTexture
             newTexture.use(self.idTexture)
 
-            self.App.ctx.fbo.use()
+            self.App.mainFbo.use()
 
         self.App.set_uniform(self.displayAnts_prog, "resolution",
                              tuple(int(size * self.windowSkele)
@@ -140,7 +140,7 @@ class Pheromone:
         self.App.ctx.point_size = self.pointSize
         self.ants.render(self.displayAnts_prog)
 
-        self.App.ctx.fbo.use()
+        self.App.mainFbo.use()
 
     @staticmethod
     def initPheromoneTextureInGLSL():

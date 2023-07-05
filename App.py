@@ -59,7 +59,7 @@ class App(mglw.WindowConfig):
     @classmethod
     def initBuffersForSaveImage(cls, self):
         cls.ctx = self.ctx
-        cls.textureFbo = cls.ctx.texture(cls.window_size, 4)
+        cls.textureFbo = cls.ctx.texture(cls.window_size, 4, dtype="f1")
         cls.textureFbo.use(location=Mapp.countTextures + Pheromone.countPheromone)
         cls.textureConvert = cls.ctx.texture(cls.window_size, 4)
         cls.Convert = cls.ctx.framebuffer(cls.textureConvert)
@@ -98,7 +98,7 @@ class App(mglw.WindowConfig):
             cls.textureFbo.write(self.ctx.fbo.read(components=4, dtype='f1'))
             cls.Convert.use()
             cls.quad.render(cls.prog)
-            self.ctx.fbo.use()
+            self.mainFbo.use()
 
             path = f"animation/animationTemp/" + \
                    '0' * (len(str(cls.countFrame)) - len(str(cls.indexFrame))) + \
@@ -122,6 +122,7 @@ class App(mglw.WindowConfig):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        self.mainFbo = self.ctx.fbo
         self.fullScreen = geometry.quad_fs(self.attributeNames)
 
         self.deBag_prog = self.load_program(
