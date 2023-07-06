@@ -10,4 +10,6 @@ out vec2 out_position;
 
 void main() {
     out_position = in_position + in_direction * frame_time * in_speed;
+
+    out_position = mod((out_position + 1) / 2, 1.) * 2 - 1;
 }

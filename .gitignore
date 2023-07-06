@@ -1,0 +1,6 @@
+*.png
+*.avi
+*.mp4
+/test.py
+/venv/
+/resources/shaders/ants/__pheromone_textures__.glsl

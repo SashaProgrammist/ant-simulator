@@ -10,8 +10,9 @@ class Pheromone:
     countPheromone = 0
     pheromones = []
 
-    def __init__(self, App, windowSkele=0.5, pointSize=None, name=None, isPheromoneWar=False,
-                 weathering=0.99, redistribution=0.9, redistributionRadius=2):
+    def __init__(self, App, windowSkele=0.5, pointSize=None,
+                 name=None, isPheromoneWar=False,
+                 weathering=0.99, redistribution=0.1, redistributionRadius=2):
         self.App = App
         self.windowSkele = windowSkele
         if pointSize is not None:
@@ -32,7 +33,8 @@ class Pheromone:
 
         self.id = Pheromone.countPheromone
 
-        self.windowSize = tuple(int(size * self.windowSkele) for size in self.App.window_size)
+        self.windowSize = tuple(int(size * self.windowSkele)
+                                for size in self.App.window_size)
         self.texture: mgl.Texture = self.App.ctx.texture(
             self.windowSize,
             2, dtype="f1")
@@ -54,6 +56,7 @@ class Pheromone:
             fragment_shader="shaders/pheromone/pheromone_display_ants_fragment_shader.glsl")
         self.App.set_uniform(self.displayAnts_prog, "isPheromoneWar", self.isPheromoneWar)
         self.App.set_uniform(self.displayAnts_prog, "pheromone", Pheromone.countPheromone)
+        self.App.set_uniform(self.displayAnts_prog, "pheromoneSampler", self.idTexture)
 
         if not self.isPheromoneWar:
             self.pheromoneUpdate_prog = self.App.load_program(
@@ -105,8 +108,7 @@ class Pheromone:
             self.App.mainFbo.use()
 
         self.App.set_uniform(self.displayAnts_prog, "resolution",
-                             tuple(int(size * self.windowSkele)
-                                   for size in self.App.window_size))
+                             newWindowSize)
         if not self.isPheromoneWar:
             self.App.set_uniform(self.pheromoneUpdate_prog, "resolution",
                                  self.App.window_size)
@@ -131,10 +133,10 @@ class Pheromone:
 
         self.fbo.use()
 
-        if not self.isPheromoneWar:
-            self.fullScreen.render(self.pheromoneUpdate_prog)
         self.App.ctx.point_size = self.pointSize
         self.ants.render(self.displayAnts_prog)
+        if not self.isPheromoneWar:
+            self.fullScreen.render(self.pheromoneUpdate_prog)
 
         self.App.mainFbo.use()
 

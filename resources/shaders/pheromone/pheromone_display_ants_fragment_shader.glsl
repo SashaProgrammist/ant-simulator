@@ -18,6 +18,6 @@ void main() {
         fragColor = vec4(vec3(1),  (0.015 - length(uv - center)) / 0.015);
     } else {
         if (v_stackingPheromoneIndex == pheromone)
-            fragColor = vec4(v_direction, 0, frame_time);
+            fragColor = vec4(v_direction, 0, frame_time / 2);
     }
 }

@@ -17,7 +17,7 @@ void main() {
             for (int j = -redistributionRadius; j <= redistributionRadius; j++) {
                 if (i != 0 || j != 0) {
                     color += redistribution * (texture(pheromoneTexture,
-                    (gl_FragCoord.xy + vec2(i, j)) / resolution).rgb - 0.5);
+                    v_texCoord + vec2(i, j) / resolution).rgb - 0.5);
                 } else {
                     color += weathering * (texture(pheromoneTexture, v_texCoord).rgb - 0.5);
                 }

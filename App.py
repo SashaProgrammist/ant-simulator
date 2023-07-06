@@ -100,19 +100,20 @@ class App(mglw.WindowConfig):
         cls.buffers = []
 
     @classmethod
-    def saveAnimation(cls, countFrame=None, name=None,
-                      fps=20., fpsSim=60, invisibleFrames=2,
+    def saveAnimation(cls, countFrame: None | int = None, name: None | str = None,
+                      fps=20., fpsSim=60., invisibleFrames=2,
                       isSaveSequence=False):
         cls.vsync = False
 
         if isSaveSequence:
             delFolder("animation/animationTemp")
 
-        def render(self: cls, *args):
+        def render(self: cls, *_):
             if not hasattr(cls, "indexFrame"):
                 cls.initSaveAnimation(
                     self, countFrame,
-                    str(countFrame) if name is None else name,
+                    (str(countFrame) if countFrame is not None else "video")
+                    if name is None else name,
                     fps, fpsSim, invisibleFrames, isSaveSequence)
 
             time, frameTime = cls.indexSimFrame / cls.fpsSim, 1 / cls.fpsSim
@@ -157,13 +158,22 @@ class App(mglw.WindowConfig):
                 while i < len(unitTimes) and timeSim >= unitTimes[i]:
                     timeSim /= unitTimes[i]
                     unitTime = unitTimesNames[i]
+                    i += 1
 
-                logger.info(f"Duration in sim: {timeSim} {unitTime} @ "
-                            f"{cls.indexFrame / time * cls.framesSim} ups")
+                logger.info(f"time in sim: {timeSim:.2f} {unitTime} @ "
+                            f"{cls.indexFrame / time * cls.framesSim:.2f} ups")
 
             cls.indexFrame += 1
 
         cls.render = render
+
+        close = cls.close
+
+        def newClose(self):
+            close(self)
+            App.video.release()
+
+        cls.close = newClose
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -185,12 +195,13 @@ class App(mglw.WindowConfig):
         self.mapp = Mapp(self)
 
         self.pheromoneWar = Pheromone(self, name="pheromoneWar", isPheromoneWar=True)
-        self.pheromoneHome = Pheromone(self, name="pheromoneHome")
+        self.pheromoneHome = Pheromone(self, name="pheromoneHome",
+                                       weathering=0.9, redistribution=0.4)
         self.pheromoneFood = Pheromone(self, name="pheromoneFood")
 
         Pheromone.initPheromoneTextureInGLSL()
 
-        self.ants = Ants(self, 100000, pointSize=5, startPosition=(-0.8, 0.8))
+        self.ants = Ants(self, 500000, pointSize=5, startPosition=(-0.8, 0.8))
 
         for pheromone in Pheromone.pheromones:
             pheromone.initAnts()
@@ -199,13 +210,13 @@ class App(mglw.WindowConfig):
 
         self.ctx.enable(mgl.BLEND)
 
-    def display(self, idTexture):
-        self.set_uniform(self.display_prog, "_texture", idTexture)
-        self.fullScreen.render(self.display_prog)
-
     def resize(self, width: int, height: int):
         self.window_size = width, height
         self.set_newResolution()
+
+    def display(self, idTexture):
+        self.set_uniform(self.display_prog, "_texture", idTexture)
+        self.fullScreen.render(self.display_prog)
 
     def set_newResolution(self):
         self.mapp.set_newResolution()

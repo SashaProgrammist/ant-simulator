@@ -21,15 +21,20 @@ float random() {
     return fract(sin(confusion * time + frame_time) * cos(in_index) * 1000);
 }
 
+void rotate(inout vec2 p, float angel) {
+    vec2 cos_sin = vec2(cos(angel), sin(angel));
+    mat2 mat = mat2(vec2(cos_sin.x, -cos_sin.y), \
+                    vec2(cos_sin.y, cos_sin.x));
+    p = mat * p;
+}
+
 void main() {
     vec2 uv = mod((in_position + 1) / 2, 1.);
     vec2 _in_position = uv * 2 - 1;
 
     float angel = random() * pi2;
-    vec2 cos_sin = vec2(cos(angel), sin(angel));
-    mat2 mat = mat2(vec2(cos_sin.x, -cos_sin.y), \
-                    vec2(cos_sin.y, cos_sin.x));
-    vec2 randomDirection = mat * in_direction * (1 + random()) / 2;
+    vec2 randomDirection = in_direction * (1 + random()) / 2;
+    rotate(randomDirection, angel);
 
     vec2 _mappDirection = texture(mappDirection, uv).rg;
     _mappDirection -= 0.5;
@@ -38,13 +43,16 @@ void main() {
     }
 
     vec2 pheromoneDirection = getPheromone(in_pheromoneControlIndex, uv);
-    if (length(pheromoneDirection) < sensitivityThreshold) {
+    float len = length(pheromoneDirection);
+    if (len < sensitivityThreshold) {
         pheromoneDirection = vec2(0);
     }
+    angel = (random() + random() - 1) / 10;
+    rotate(pheromoneDirection, angel);
 
-    out_direction = normalize( \
+    out_direction = normalize(\
         in_direction * 1 + \
         randomDirection * 0.2 + \
         _mappDirection * 3 + \
-        pheromoneDirection * -0.4);
+        pheromoneDirection * -0.1);
 }
