@@ -15,7 +15,7 @@ uniform sampler2D mappDirection;
 uniform float sensitivityThreshold;
 out vec2 out_direction;
 
-float confusion = 1;
+float confusion = 0;
 float random() {
     confusion += 1;
     return fract(sin(confusion * time + frame_time) * cos(in_index) * 1000);

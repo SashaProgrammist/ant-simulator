@@ -30,7 +30,7 @@ def delFolder(folder):
 
 class App(mglw.WindowConfig):
     log_level = logging.INFO
-    window_size = 1600, 900
+    window_size = 1280, 720
     resource_dir = 'resources'
     fullscreen = False
     title = "ant simulator"
@@ -186,7 +186,7 @@ class App(mglw.WindowConfig):
         self.deBag_prog = self.load_program(
             vertex_shader='shaders/deBag/deBag_vertex_shader.glsl',
             fragment_shader='shaders/deBag/deBag_fragment_shader.glsl')
-        self.set_uniform(self.deBag_prog, "_texture", 2)
+        self.set_uniform(self.deBag_prog, "_texture", 3)
 
         self.display_prog = self.load_program(
             vertex_shader='shaders/display/display_vertex_shader.glsl',
@@ -196,12 +196,13 @@ class App(mglw.WindowConfig):
 
         self.pheromoneWar = Pheromone(self, name="pheromoneWar", isPheromoneWar=True)
         self.pheromoneHome = Pheromone(self, name="pheromoneHome",
-                                       weathering=0.9, redistribution=0.4)
+                                       weathering=0.9, redistribution=0.4,
+                                       pointSize=4)
         self.pheromoneFood = Pheromone(self, name="pheromoneFood")
 
         Pheromone.initPheromoneTextureInGLSL()
 
-        self.ants = Ants(self, 500000, pointSize=5, startPosition=(-0.8, 0.8))
+        self.ants = Ants(self, 500000, pointSize=2, startPosition=(-0.8, 0.8))
 
         for pheromone in Pheromone.pheromones:
             pheromone.initAnts()
@@ -238,7 +239,7 @@ class App(mglw.WindowConfig):
             pheromone.update(time, frame_time)
 
     def _render(self, time, frame_time):
-        if frame_time > 0.02:
+        if frame_time > 0.06:
             frame_time = 0
 
         self.ctx.clear()

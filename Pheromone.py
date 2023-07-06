@@ -21,7 +21,7 @@ class Pheromone:
             if isPheromoneWar:
                 self.pointSize = 25
             else:
-                self.pointSize = 3
+                self.pointSize = 1
         if name is not None:
             self.name = name
         else:
@@ -37,7 +37,7 @@ class Pheromone:
                                 for size in self.App.window_size)
         self.texture: mgl.Texture = self.App.ctx.texture(
             self.windowSize,
-            2, dtype="f1")
+            3, dtype="f1")
         self.idTexture = Pheromone.countPheromone + self.App.mapp.countTextures
         self.texture.use(self.idTexture)
 
@@ -128,6 +128,7 @@ class Pheromone:
 
     def update(self, time, frame_time):
         self.App.set_uniform(self.displayAnts_prog, "frame_time", frame_time)
+        self.App.set_uniform(self.displayAnts_prog, "time", time)
         if not self.isPheromoneWar:
             self.updateWeatheringRedistribution(frame_time)
 

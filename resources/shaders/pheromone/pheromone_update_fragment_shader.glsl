@@ -17,15 +17,16 @@ void main() {
             for (int j = -redistributionRadius; j <= redistributionRadius; j++) {
                 if (i != 0 || j != 0) {
                     color += redistribution * (texture(pheromoneTexture,
-                    v_texCoord + vec2(i, j) / resolution).rgb - 0.5);
+                    v_texCoord + vec2(i, j) / resolution).rgb - vec3(0.5, 0.5, 0));
                 } else {
-                    color += weathering * (texture(pheromoneTexture, v_texCoord).rgb - 0.5);
+                    color += weathering *
+                    (texture(pheromoneTexture, v_texCoord).rgb - vec3(0.5, 0.5, 0));
                 }
             }
         }
     }
 
-    color += 0.5;
+    color += vec3(0.5, 0.5, 0);
 
     fragColor = vec4(color, 1);
 }
