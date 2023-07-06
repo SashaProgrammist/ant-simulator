@@ -3,6 +3,7 @@
 in vec2 v_texCoord;
 in vec2 v_position;
 uniform sampler2D _texture;
+uniform int channel;
 out vec4 fragColor;
 
 void main() {
