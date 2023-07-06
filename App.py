@@ -218,6 +218,9 @@ class App(mglw.WindowConfig):
         self.window_size = width, height
         self.set_newResolution()
 
+    def key_event(self, key, action, modifiers):
+        self.deBug.key_event(key, action, modifiers)
+
     def display(self, idTexture):
         self.set_uniform(self.display_prog, "_texture", idTexture)
         self.fullScreen.render(self.display_prog)
@@ -243,7 +246,7 @@ class App(mglw.WindowConfig):
 
     def _render(self, time, frame_time):
         if frame_time > 0.06:
-            frame_time = 0
+            frame_time = 0.06
 
         self.ctx.clear()
 
