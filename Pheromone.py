@@ -147,22 +147,27 @@ class Pheromone:
 
     @staticmethod
     def initPheromoneTextureInGLSL():
-        with open("resources/shaders/ants/__pheromone_textures__.glsl", "w") as pheromone_textures:
+        with open("resources/shaders/ants/__pheromone_textures__.glsl", "w") as file:
             for pheromone in Pheromone.pheromones:
-                pheromone_textures.write(f"uniform sampler2D {pheromone.name};\n")
-            pheromone_textures.write("\n")
+                file.write(f"uniform sampler2D {pheromone.name};\n")
+            file.write("\n")
 
-            pheromone_textures.write("vec2 getPheromone(float id, vec2 uv) {\n"
-                                     "    vec2 result = vec2(0.);\n")
+            for i, pheromone in enumerate(Pheromone.pheromones):
+                file.write(f"void get{pheromone.name}(inout vec2 vec, vec2 uv) ""{\n"
+                           f"    vec3 color = texture({pheromone.name}, uv).rgb;\n"
+                           f"    vec = (color.rg - 0.5) * 10 * color.b;\n"
+                           "}\n\n")
+
+            file.write("vec2 getPheromone(float id, vec2 uv) {\n"
+                       "    vec2 result = vec2(0.);\n")
             for i, pheromone in enumerate(Pheromone.pheromones):
                 if not i:
-                    pheromone_textures.write(f"    if (int(id) == {i}) ""{\n")
+                    file.write(f"    if (int(id) == {i}) ""{\n")
                 elif i != len(Pheromone.pheromones) - 1:
-                    pheromone_textures.write("    }"f" else if (int(id) == {i}) ""{\n")
+                    file.write("    }"f" else if (int(id) == {i}) ""{\n")
                 else:
-                    pheromone_textures.write("    } else {\n")
-                pheromone_textures.write(f"            result = (texture({pheromone.name},"
-                                         f" uv).rg - 0.5) * 2;\n")
-            pheromone_textures.write("    }\n"
-                                     "    return result;\n"
-                                     "}\n")
+                    file.write("    } else {\n")
+                file.write(f"            get{pheromone.name}(result, uv);\n")
+            file.write("    }\n"
+                       "    return result;\n"
+                       "}\n")

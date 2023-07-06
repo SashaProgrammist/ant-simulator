@@ -52,7 +52,7 @@ void main() {
 
     out_direction = normalize(\
         in_direction * 1 + \
-        randomDirection * 0.2 + \
+        randomDirection * 0.05 + \
         _mappDirection * 3 + \
         pheromoneDirection * -0.1);
 }

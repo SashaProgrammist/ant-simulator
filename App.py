@@ -108,6 +108,28 @@ class App(mglw.WindowConfig):
         if isSaveSequence:
             delFolder("animation/animationTemp")
 
+        close = cls.close
+
+        def newClose(self):
+            close(self)
+            App.video.release()
+
+            unitTimes = [60, 60, 24, 30, 12]
+            unitTimesNames = ["m", "h", "d", "m", "e"]
+            i = 0
+            time = self.timer.time
+            timeSim = cls.indexSimFrame / cls.fpsSim
+            unitTime = "s"
+            while i < len(unitTimes) and timeSim >= unitTimes[i]:
+                timeSim /= unitTimes[i]
+                unitTime = unitTimesNames[i]
+                i += 1
+
+            logger.info(f"time in sim: {timeSim:.2f} {unitTime} @ "
+                        f"{cls.indexFrame / time * cls.framesSim:.2f} ups")
+
+        cls.close = newClose
+
         def render(self: cls, *_):
             if not hasattr(cls, "indexFrame"):
                 cls.initSaveAnimation(
@@ -149,31 +171,11 @@ class App(mglw.WindowConfig):
 
                 cls.video.release()
 
-                unitTimes = [60, 60, 24, 30, 12]
-                unitTimesNames = ["m", "h", "d", "m", "e"]
-                i = 0
-                time = self.timer.time
-                timeSim = cls.indexSimFrame / cls.fpsSim
-                unitTime = "s"
-                while i < len(unitTimes) and timeSim >= unitTimes[i]:
-                    timeSim /= unitTimes[i]
-                    unitTime = unitTimesNames[i]
-                    i += 1
-
-                logger.info(f"time in sim: {timeSim:.2f} {unitTime} @ "
-                            f"{cls.indexFrame / time * cls.framesSim:.2f} ups")
+                cls.close(self)
 
             cls.indexFrame += 1
 
         cls.render = render
-
-        close = cls.close
-
-        def newClose(self):
-            close(self)
-            App.video.release()
-
-        cls.close = newClose
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -202,7 +204,7 @@ class App(mglw.WindowConfig):
 
         Pheromone.initPheromoneTextureInGLSL()
 
-        self.ants = Ants(self, 500000, pointSize=2, startPosition=(-0.8, 0.8))
+        self.ants = Ants(self, 500000, pointSize=4, startPosition=(-0.8, 0.8))
 
         for pheromone in Pheromone.pheromones:
             pheromone.initAnts()
