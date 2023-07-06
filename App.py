@@ -202,6 +202,9 @@ class App(mglw.WindowConfig):
                                        pointSize=4)
         self.pheromoneFood = Pheromone(self, name="pheromoneFood")
 
+        self.pheromoneHome.addAntipode(self.pheromoneFood)
+        self.pheromoneFood.addAntipode(self.pheromoneHome)
+
         Pheromone.initPheromoneTextureInGLSL()
 
         self.ants = Ants(self, 500000, pointSize=4, startPosition=(-0.8, 0.8))

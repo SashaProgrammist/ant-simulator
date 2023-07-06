@@ -8,13 +8,9 @@ simulator.
 
 # comments about used libraries
 
-- moderngl as mgl -
-project basis
-- moderngl_window as mglw -
-used to create windows
-- cv2 -
-used to create 
-video and image
+- moderngl as mgl - project basis
+- moderngl_window as mglw - used to create windows
+- cv2 - used to create video and image
 
 ---
 
@@ -36,9 +32,7 @@ no
 
 ### result
 
-real 
-time 
-simulation 
+real time simulation 
 
 ---
 

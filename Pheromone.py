@@ -77,6 +77,9 @@ class Pheromone:
 
             self.pheromoneUpdate_prog = None
 
+        self.antipodes: list[Pheromone] = []
+        self.isHaveAntipodes = False
+
         Pheromone.countPheromone += 1
         Pheromone.pheromones.append(self)
 
@@ -84,6 +87,10 @@ class Pheromone:
         buffers = self.App.ants.buffers
         for buffer in buffers:
             self.ants.buffer(buffer.buffer, buffer.buffer_format, buffer.attributes)
+
+    def addAntipode(self, newAntipode):
+        self.antipodes.append(newAntipode)
+        self.isHaveAntipodes = True
 
     def set_newResolution(self):
         newWindowSize = tuple(int(size * self.windowSkele) for size in self.App.window_size)
@@ -152,11 +159,22 @@ class Pheromone:
                 file.write(f"uniform sampler2D {pheromone.name};\n")
             file.write("\n")
 
-            for i, pheromone in enumerate(Pheromone.pheromones):
-                file.write(f"void get{pheromone.name}(inout vec2 vec, vec2 uv) ""{\n"
+            for pheromone in Pheromone.pheromones:
+                file.write(f"vec2 {'_' if pheromone.isHaveAntipodes else ''}"
+                           f"get{pheromone.name}(in vec2 uv) ""{\n"
                            f"    vec3 color = texture({pheromone.name}, uv).rgb;\n"
-                           f"    vec = (color.rg - 0.5) * 10 * color.b;\n"
+                           f"    return (color.rg - 0.5) * 10 * color.b;\n"
                            "}\n\n")
+
+            for pheromone in Pheromone.pheromones:
+                if pheromone.isHaveAntipodes:
+                    file.write(f"vec2 get{pheromone.name}(in vec2 uv) ""{\n"
+                               f"    vec2 vec = _get{pheromone.name}(uv);\n")
+                    for antipode in pheromone.antipodes:
+                        file.write(f"    vec -= {'_' if antipode.isHaveAntipodes else ''}"
+                                   f"get{antipode.name}(uv) * 0.5;\n")
+                    file.write("    return vec;\n"
+                               "}\n\n")
 
             file.write("vec2 getPheromone(float id, vec2 uv) {\n"
                        "    vec2 result = vec2(0.);\n")
@@ -167,7 +185,7 @@ class Pheromone:
                     file.write("    }"f" else if (int(id) == {i}) ""{\n")
                 else:
                     file.write("    } else {\n")
-                file.write(f"            get{pheromone.name}(result, uv);\n")
+                file.write(f"            result = get{pheromone.name}(uv);\n")
             file.write("    }\n"
                        "    return result;\n"
                        "}\n")

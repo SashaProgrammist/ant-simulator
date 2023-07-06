@@ -98,7 +98,7 @@ class Ants:
             self.ants.get_buffer_by_name("in_stackingPheromoneIndex"), "1f"))
 
         pheromoneControlIndexData = \
-            np.array([self.App.pheromoneHome.id] * self.countAnts, dtype=np.float32)
+            np.array([self.App.pheromoneFood.id] * self.countAnts, dtype=np.float32)
         self.ants.buffer(pheromoneControlIndexData, "1f", ["in_pheromoneControlIndex"])
         self.buffers.append(AntBufferInfo(
             self.ants.get_buffer_by_name("in_pheromoneControlIndex"), "1f"))
