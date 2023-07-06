@@ -1,5 +1,4 @@
 import moderngl_window as mglw
-import numpy as np
 from itertools import chain
 
 
@@ -9,12 +8,14 @@ class DeBug:
 
     def __init__(self, App: mglw.WindowConfig):
         self.App = App
-        self.deBag_prog = self.App.load_program(
+        self.prog = self.App.load_program(
             vertex_shader='shaders/deBag/deBag_vertex_shader.glsl',
             fragment_shader='shaders/deBag/deBag_fragment_shader.glsl')
+        self.setStandardChannels()
 
         self.isRender = False
         self.isRenderAnt = True
+        self.isRenderPheromoneWar = True
 
         self.isCtrl = False
         self.isShift = False
@@ -41,12 +42,46 @@ class DeBug:
         return self.App.wnd.keys.A
 
     @property
+    def W(self):
+        return self.App.wnd.keys.W
+
+    @property
     def number0(self):
         return self.App.wnd.keys.NUMBER_0
 
     @property
     def number9(self):
         return self.App.wnd.keys.NUMBER_9
+
+    @property
+    def actionPress(self):
+        return self.App.wnd.keys.ACTION_PRESS
+
+    def setChannels(self, code: str):
+        shortCodes = {
+            '': "rgb", 'r': "r__", 'g': "_g_", 'b': "__b",
+            'rb': "r_b", 'br': "r_b", 'rg': "r_g",
+            'gr': "r_g", 'bg': "_bg", 'gb': "_bg"}
+
+        if len(code) < 3:
+            code.replace('_', '')
+            code = shortCodes[code]
+
+        channels: dict[str, list[int]] = {
+            'r': [0, 0, 0],
+            'g': [0, 0, 0],
+            'b': [0, 0, 0],
+            '_': [0, 0, 0]}
+        for i, letter in enumerate(code):
+            channels[letter][i] = 1
+
+        for channel, value in channels.items():
+            if channel != '_':
+                self.App.set_uniform(self.prog, f"channel{channel.upper()}",
+                                     tuple(value))
+
+    def setStandardChannels(self):
+        self.setChannels("rgb")
 
     def addInCollectorCtrl(self, letter):
         if len(self.collectorCtrl) >= 3:
@@ -55,12 +90,14 @@ class DeBug:
             self.collectorCtrl += letter
 
     def key_event(self, key, action, *_):
-        if action == self.App.wnd.keys.ACTION_PRESS:
+        if action == self.actionPress:
             match key:
                 case self.SHIFT:
                     self.isShift = True
                 case self.A:
                     self.isRenderAnt = not self.isRenderAnt
+                case self.W:
+                    self.isRenderPheromoneWar = not self.isRenderPheromoneWar
                 case self.CTRL:
                     self.isCtrl = True
 
@@ -72,13 +109,21 @@ class DeBug:
         else:
             match key:
                 case self.SHIFT:
-                    print(self.collectorShift)
+                    if self.collectorShift:
+                        self.App.set_uniform(self.prog, "_texture",
+                                             int(self.collectorShift))
+                        self.isRender = True
+                    else:
+                        self.isRender = False
+                        self.setStandardChannels()
                     self.collectorShift = ""
                     self.isShift = False
                 case self.CTRL:
-                    print(self.collectorCtrl)
+                    if self.isRender:
+                        self.setChannels(self.collectorCtrl)
                     self.collectorCtrl = ""
                     self.isCtrl = False
 
     def render(self):
-        pass
+        if self.isRender:
+            self.App.fullScreen.render(self.prog)

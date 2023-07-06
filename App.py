@@ -236,8 +236,9 @@ class App(mglw.WindowConfig):
         self.deBug.render()
         if self.deBug.isRenderAnt:
             self.ants.render()
-        for pheromone in Pheromone.pheromonesWar:
-            pheromone.render()
+        if self.deBug.isRenderPheromoneWar:
+            for pheromone in Pheromone.pheromonesWar:
+                pheromone.render()
 
     def update(self, time, frame_time):
         self.ants.update(time, frame_time)
