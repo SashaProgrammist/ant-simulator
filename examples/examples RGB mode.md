@@ -30,7 +30,7 @@ vec3 channelB = vec3(0, 0, 1);
 ## examples RGB mode: medium codes
 [medium codes](../README.md#medium-codes)
 
-code - rgb
+code - rgb  
 encoded:
 ```glsl
 vec3 channelR = vec3(1, 0, 0);
