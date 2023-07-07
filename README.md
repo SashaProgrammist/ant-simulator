@@ -56,7 +56,7 @@ mglw.run_window_config(App)
   - if `str` is used for video title
   - if `None`:
     - if `countFrame` is `int`  
-    `name = str(countFrame)`
+    `name = str(countFrame) + '_'`
     - if `countFrame` is `None`  
     `name = "video" `
 - `fps: float = 20.`
@@ -68,8 +68,8 @@ this is used for indicate count of update not included in video
 - `isSaveSequence: bool = False`
 this is used to specify whether to save frames falling into the video  
 sequence save in [animation/animationTemp](animation/animationTemp)  
-  - if `True` images in the [folder](animation/animationTemp) will be removed
-  - if `False` images in the [folder](animation/animationTemp) will be will remain
+  - if `True` images starting with `name` in the [folder](animation/animationTemp) will be removed
+  - if `False` images starting with `name` in the [folder](animation/animationTemp) will be will remain
 
 ### result
 

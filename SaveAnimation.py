@@ -5,16 +5,17 @@ import shutil
 import cv2
 
 
-def delFolder(folder):
+def delInFolderFrameWithName(folder, name):
     for filename in os.listdir(folder):
-        file_path = os.path.join(folder, filename)
-        try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-        except Exception as e:
-            print('Failed to delete %s. Reason: %s' % (file_path, e))
+        if filename.startswith(name):
+            file_path = os.path.join(folder, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 
 class SaveAnimation:
@@ -25,18 +26,23 @@ class SaveAnimation:
                  fps, fpsSim, invisibleFrames, isSaveSequence):
         self.App = App
         self.countFrame = countFrame
+        self.name = name or countFrame or "video"
+        if isinstance(self.name, int):
+            self.name = str(self.name) + '_'
         self.fps = fps
         self.fpsSim = fpsSim
         self.framesSim = invisibleFrames + 1
         self.isSaveSequence = isSaveSequence
 
+        self.countZero = len(str((self.countFrame or self.framesSim * 10 ** 15) // self.framesSim))
+
         if self.isSaveSequence:
-            delFolder("animation/animationTemp")
+            delInFolderFrameWithName("animation/animationTemp", self.name)
 
         self.indexFrame = 0
         self.indexSimFrame = 0
         self.video = cv2.VideoWriter(
-            f'animation/saveAnimation/{name}.avi',
+            f'animation/saveAnimation/{self.name}.avi',
             cv2.VideoWriter_fourcc(*'mp4v'), self.fps,
             self.App.window_size)
         self.App.video = self.video
@@ -93,19 +99,17 @@ class SaveAnimation:
         buf: np.ndarray = np.frombuffer(raw, dtype='uint8'). \
             reshape((*self.App.mainFbo.size[1::-1], 3))
 
-        if self.isSaveSequence:
-            path = f"animation/animationTemp/" + \
-                   '0' * (len(str(self.countFrame // self.framesSim)) -
-                          len(str(self.indexFrame))) + \
+        if (self.countFrame is None or self.indexFrame < self.countFrame) and self.isSaveSequence:
+            path = f"animation/animationTemp/{self.name}" + \
+                   '0' * (self.countZero - len(str(self.indexFrame))) + \
                    f"{self.indexFrame}.png"
             cv2.imwrite(path, buf)
 
-        self.video.write(buf)
+        if self.countFrame is None or self.indexFrame < self.countFrame:
+            self.video.write(buf)
 
         if self.countFrame is not None and self.indexFrame >= self.countFrame:
             self.App.wnd.is_closing = True
-
-            self.video.release()
 
             self.App.close()
 
@@ -144,7 +148,7 @@ class SaveAnimation:
 
     @staticmethod
     def getNewClose(*_):
-        return SaveAnimation.self.oldClose()
+        return SaveAnimation.self.close()
 
     @staticmethod
     def getNewRender(*_):
