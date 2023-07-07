@@ -14,6 +14,7 @@ import numpy as np
 from Ants import Ants
 from Pheromone import Pheromone
 from Mapp import Mapp
+from DeBug import DeBug
 
 
 def delFolder(folder):
@@ -185,10 +186,7 @@ class App(mglw.WindowConfig):
         self.mainFbo = self.wnd.fbo
         self.fullScreen = geometry.quad_fs(self.attributeNames)
 
-        self.deBag_prog = self.load_program(
-            vertex_shader='shaders/deBag/deBag_vertex_shader.glsl',
-            fragment_shader='shaders/deBag/deBag_fragment_shader.glsl')
-        self.set_uniform(self.deBag_prog, "_texture", 3)
+        self.deBug = DeBug(self)
 
         self.display_prog = self.load_program(
             vertex_shader='shaders/display/display_vertex_shader.glsl',
@@ -220,23 +218,27 @@ class App(mglw.WindowConfig):
         self.window_size = width, height
         self.set_newResolution()
 
+    def key_event(self, key, action, modifiers):
+        self.deBug.key_event(key, action, modifiers)
+
     def display(self, idTexture):
         self.set_uniform(self.display_prog, "_texture", idTexture)
         self.fullScreen.render(self.display_prog)
 
     def set_newResolution(self):
         self.mapp.set_newResolution()
-        self.set_uniform(self.deBag_prog, "resolution", self.window_size)
         self.ants.set_newResolution()
         for pheromone in Pheromone.pheromones:
             pheromone.set_newResolution()
 
     def renderVao(self):
         self.mapp.render()
-        self.fullScreen.render(self.deBag_prog)
-        self.ants.render()
-        for pheromone in Pheromone.pheromones:
-            pheromone.render()
+        self.deBug.render()
+        if self.deBug.isRenderAnt:
+            self.ants.render()
+        if self.deBug.isRenderPheromoneWar:
+            for pheromone in Pheromone.pheromonesWar:
+                pheromone.render()
 
     def update(self, time, frame_time):
         self.ants.update(time, frame_time)
@@ -245,7 +247,7 @@ class App(mglw.WindowConfig):
 
     def _render(self, time, frame_time):
         if frame_time > 0.06:
-            frame_time = 0
+            frame_time = 0.06
 
         self.ctx.clear()
 

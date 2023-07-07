@@ -22,7 +22,7 @@ float random() {
 void main() {
     v_position = in_position;
     gl_Position = vec4(v_position, 0, 1);
-    collor = vec4(-in_direction / 2 + 0.5, 0, frame_time / 2);
+    collor = vec4(-in_direction / 2 + 0.5, 0, frame_time);
 
     if (isPheromoneWar) {
         if (texture(pheromoneSampler, (v_position + 1) / 2).r > 0.99) {
@@ -30,7 +30,7 @@ void main() {
         }
     } else if (in_stackingPheromoneIndex != pheromone) {
         gl_Position = vec4(2);
-    } else if (random() > 0.8) {
+    } else if (random() > 0.45) {
         collor.b = 1;
     }
 

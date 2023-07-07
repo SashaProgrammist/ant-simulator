@@ -9,6 +9,7 @@ from Mapp import Mapp
 class Pheromone:
     countPheromone = 0
     pheromones = []
+    pheromonesWar = []
 
     def __init__(self, App, windowSkele=0.5, pointSize=None,
                  name=None, isPheromoneWar=False,
@@ -82,6 +83,8 @@ class Pheromone:
 
         Pheromone.countPheromone += 1
         Pheromone.pheromones.append(self)
+        if self.isPheromoneWar:
+            Pheromone.pheromonesWar.append(self)
 
     def initAnts(self):
         buffers = self.App.ants.buffers

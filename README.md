@@ -74,3 +74,85 @@ sequence save in [animation/animationTemp](animation/animationTemp)
 ### result
 
 video save in [animation/saveAnimation](animation/saveAnimation)
+
+---
+
+# runtime simulation control
+
+## deBug modes
+
+### display texture
+
+#### how to activate and deactivate
+
+hold down <kbd>SHIFT</kbd> then
+enter the texture index you want to render then
+stop pressing <kbd>SHIFT</kbd>
+
+if hold down <kbd>SHIFT</kbd> then stop pressing <kbd>SHIFT</kbd>
+display texture deactivate
+
+#### how to manage
+
+##### manage RGB channels
+
+hold down <kbd>CTRL</kbd> then
+enter kode RGB mod then
+stop pressing <kbd>CTRL</kbd>
+
+how is encoded RGB mod:
+
+###### short codes
+if the code is less than 3:  
+order is not important. if channel in kode, channel will be shown.  
+[examples](examples/examples%20RGB%20mode.md#examples-rgb-mode-short-codes)
+
+###### medium codes
+if the code is greater and equal than 3 and count point is less than 2:  
+order is important. only the last 3 characters are important.  
+the first character in important means which channel will be instead of red,  
+the second character in important means which channel will be instead of green,  
+the third character in important means which channel will be instead of blue.  
+if instead of the channel will be <kbd>SPACE</kbd> or <kbd>.</kbd> color value is zero.  
+[examples](examples/examples%20RGB%20mode.md#examples-rgb-mode-medium-codes)
+
+###### large codes
+all other cases:  
+the code is divided into blocks the separator is <kbd>.</kbd>.  
+order blocks is important. order in blocks is important. only the last 3 blocks are important.  
+the first block is responsible for red, the second block is responsible for green, the third block is responsible for blue.  
+blocks are divided into sub blocks consisting of a letter and a number that comes after the letter, 
+if there was no number it is perceived as 1
+numbers sub blocks which have the same letter. this amount means that the color will depend on so many parts of the letter  
+[examples](examples/examples%20RGB%20mode.md#examples-rgb-mode-large-codes)
+
+in shader, it looks like [this](resources/shaders/deBag/deBag_fragment_shader.glsl)
+
+how to type fast large codes if blocks same
+
+
+hold down <kbd>CTRL</kbd> then 
+enter kode one block then 
+pinch <kbd>S</kbd> 
+
+
+### display Ants
+
+#### how to activate and deactivate
+
+press <kbd>A</kbd> to turn on and off
+
+#### how to manage
+
+no
+
+### display pheromoneWar
+
+#### how to activate and deactivate
+
+press <kbd>W</kbd> to turn on and off
+
+#### how to manage
+
+no
+
