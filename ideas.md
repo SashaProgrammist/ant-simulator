@@ -24,6 +24,9 @@ mapp_direction внутри стен
 - [ ] start 20:22 07.07  
 ants_transform_direction от времени 
 
+- [ ] start 9:08 08.07
+задание альфы в дебаг 
+
 Выполненные
 
 - [x] start 7:32 07.07 end 22:42 07.07
