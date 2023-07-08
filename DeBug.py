@@ -135,7 +135,7 @@ class DeBug:
 
         for channel, value in channels.items():
             self.App.set_uniform(self.prog, f"channel{channel.upper()}",
-                                 value)
+                                 tuple(value))
 
     def setStandardChannels(self):
         self.setChannels("rgb")

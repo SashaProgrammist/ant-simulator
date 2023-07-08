@@ -36,9 +36,7 @@ class Pheromone:
 
         self.windowSize = tuple(int(size * self.windowSkele)
                                 for size in self.App.window_size)
-        self.texture: mgl.Texture = self.App.ctx.texture(
-            self.windowSize,
-            3, dtype="f1")
+        self.texture: mgl.Texture = self.createTexture()
         self.idTexture = Pheromone.countPheromone + self.App.mapp.countTextures
         self.texture.use(self.idTexture)
 
@@ -86,6 +84,9 @@ class Pheromone:
         if self.isPheromoneWar:
             Pheromone.pheromonesWar.append(self)
 
+    def createTexture(self):
+        return self.App.ctx.texture(self.windowSize, 3, dtype="f1")
+
     def initAnts(self):
         buffers = self.App.ants.buffers
         for buffer in buffers:
@@ -99,9 +100,8 @@ class Pheromone:
         newWindowSize = tuple(int(size * self.windowSkele) for size in self.App.window_size)
 
         if newWindowSize != self.windowSize:
-            newTexture = self.App.ctx.texture(
-                tuple(int(size * self.windowSkele) for size in self.App.window_size),
-                2, dtype="f1")
+            self.windowSize = newWindowSize
+            newTexture = self.createTexture()
             newFbo = self.App.ctx.framebuffer(newTexture)
             newFbo.use()
 

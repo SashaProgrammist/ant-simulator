@@ -1,6 +1,6 @@
 from App import *
 
-saveAnimation = True
+saveAnimation = False
 
 if __name__ == '__main__':
     if saveAnimation:

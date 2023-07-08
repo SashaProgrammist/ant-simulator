@@ -4,6 +4,7 @@ import moderngl_window as mglw
 from moderngl_window import geometry
 from moderngl_window.geometry.attributes import AttributeNames
 from moderngl_window.timers.clock import Timer
+from argparse import Namespace, ArgumentParser
 
 from Ants import Ants
 from Pheromone import Pheromone
@@ -23,6 +24,7 @@ class App(mglw.WindowConfig):
     attributeNames = AttributeNames(texcoord_0="in_texCoord")
     clear_color = (1, 1, 1)
     vsync = True
+    argv: Namespace = Namespace(window="pyglet")
 
     @classmethod
     def saveAnimation(cls, countFrame: None | int = None, name: None | str = None,
@@ -39,6 +41,12 @@ class App(mglw.WindowConfig):
         cls.close = SaveAnimation.getNewClose
 
         cls.render = SaveAnimation.getNewRender
+
+    @classmethod
+    def add_arguments(cls, parser: ArgumentParser):
+        classVars = vars(App.argv)
+        for var in classVars:
+            parser.add_argument('-' + var, '-' + classVars[var])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -73,7 +81,7 @@ class App(mglw.WindowConfig):
 
         self.countTextures += Pheromone.countPheromone
 
-        self.ants = Ants(self, 500000, pointSize=4, startPosition=(-0.8, 0.8))
+        self.ants = Ants(self, 100000, pointSize=4, startPosition=(-0.8, 0.8))
 
         for pheromone in Pheromone.pheromones:
             pheromone.initAnts()
