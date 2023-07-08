@@ -4,35 +4,67 @@ from itertools import chain
 import numpy as np
 
 
+class CtrlMode:
+    def __init__(self, deBug, name, finalizer):
+        self.deBug: DeBug = deBug
+        self.name: str = name
+        self._finalizer: callable = finalizer
+
+    def __eq__(self, other):
+        return self.name == other.name
+
+    def finalizer(self):
+        # _finalizer = self._finalizer
+        # _finalizer()
+        self._finalizer()
+        self.deBug.currentCtrlMode = self.deBug.defaultCtrlMode
+
+
 class DeBug:
     SHIFT = 65505
     CTRL = 65507
 
     def __init__(self, App: mglw.WindowConfig):
         self.App = App
+
+        self.possibleToSet = []
+
         self.prog = self.App.load_program(
             vertex_shader='shaders/deBag/deBag_vertex_shader.glsl',
             fragment_shader='shaders/deBag/deBag_fragment_shader.glsl')
+        self.textureId = 0
+        self.possibleToSet.append("textureId")
         self.setStandardChannels()
 
         self.isRender = False
         self.isRenderAnt = True
+        self.possibleToSet.append("isRenderAnt")
         self.isRenderPheromoneWar = True
+        self.possibleToSet.append("isRenderPheromoneWar")
 
         self.isCtrl = False
         self.isShift = False
 
+        self.defaultCtrlMode = CtrlMode(self, "default",
+                                        self.resetCollectorCtrl)
+        self.colorCtrlMode = CtrlMode(self, "color",
+                                        self.setChannelsFromCollector)
+        self.currentCtrlMode = self.defaultCtrlMode
+
         self.collectorCtrl = ""
         self.collectorShift = ""
 
-        self.colorKeys = {
+        self.ctrlKeys = {
             self.App.wnd.keys.R: "r",
             self.App.wnd.keys.G: "g",
             self.App.wnd.keys.B: "b",
             self.App.wnd.keys.SPACE: "_",
             65454: '.',  # numpad
             47: '.',  # English layout
-            816043786240: '.'}  # Russian layout
+            816043786240: '.',  # Russian layout
+            self.App.wnd.keys.SLASH: '/',  # English layout
+            65455: '/',  # numpad
+            92: '/'}  # Russian layout
         self.numpadNumbers = [
             65379,       65367, 65364, 65366, 65361,
             51539607552, 65363, 65360, 65362, 65365]
@@ -41,7 +73,6 @@ class DeBug:
             chain(enumerate(range(self.number0, self.number9 + 1)),
                   enumerate(self.numpadNumbers),
                   enumerate(range(self.numpad0, self.numpad9 + 1)))}
-        pass
 
     @property
     def A(self):
@@ -54,6 +85,10 @@ class DeBug:
     @property
     def S(self):
         return self.App.wnd.keys.S
+
+    @property
+    def C(self):
+        return self.App.wnd.keys.C
 
     @property
     def number0(self):
@@ -74,6 +109,17 @@ class DeBug:
     @property
     def actionPress(self):
         return self.App.wnd.keys.ACTION_PRESS
+
+    def set(self, **kwargs):
+        for atr in kwargs:
+            if atr is self.possibleToSet:
+                if hasattr(self, atr):
+                    setattr(self, atr, kwargs[atr])
+            else:
+                raise Exception(f"{atr} = {kwargs[atr]} is not possible to set")
+
+        if "textureId" in kwargs:
+            self.setTextureId(kwargs["textureId"])
 
     def setChannels(self, code: str):
         countPoint = code.count('.')
@@ -114,7 +160,8 @@ class DeBug:
                 if letter.isalpha():
                     number = ''
                     current = j + 1
-                    while current < len(resultChanel) and resultChanel[current].isdigit():
+                    while current < len(resultChanel) and \
+                            resultChanel[current].isdigit():
                         number += resultChanel[current]
                         current += 1
                     if not number:
@@ -146,6 +193,20 @@ class DeBug:
         self.collectorCtrl = ''
         self.isCtrl = False
 
+    def setTextureId(self, newId):
+        self.textureId = newId
+        self.App.set_uniform(self.prog, "_texture",
+                             self.textureId)
+        self.isRender = True
+        self.setStandardChannels()
+
+    def resetCollectorCtrl(self):
+        self.collectorCtrl = ''
+
+    def leaveLastsBlock(self, countBlock=1):
+        if self.collectorCtrl.count('.') >= countBlock:
+            self.collectorCtrl = '.'.join(self.collectorCtrl.split('.')[-countBlock:])
+
     def key_event(self, key, action, *_):
         if action == self.actionPress:
             match key:
@@ -155,30 +216,29 @@ class DeBug:
                     self.isRenderAnt = not self.isRenderAnt
                 case self.W:
                     self.isRenderPheromoneWar = not self.isRenderPheromoneWar
+                case self.C:
+                    if self.isCtrl:
+                        self.currentCtrlMode = self.colorCtrlMode
                 case self.CTRL:
                     self.isCtrl = True
                 case self.S:
-                    if self.isCtrl:
-                        if self.collectorCtrl.count('.'):
-                            self.collectorCtrl = self.collectorCtrl.split('.')[-1]
+                    if self.isCtrl and self.currentCtrlMode == self.colorCtrlMode:
+                        self.leaveLastsBlock()
                         self.collectorCtrl = '.'.join([self.collectorCtrl] * 3)
-                        self.setChannelsFromCollector()
+                        self.currentCtrlMode.finalizer()
 
             if self.isShift and key in self.numbersKeys:
                 self.collectorShift += self.numbersKeys[key]
 
-            if self.isCtrl and key in self.colorKeys:
-                self.collectorCtrl += self.colorKeys[key]
+            if self.isCtrl and key in self.ctrlKeys:
+                self.collectorCtrl += self.ctrlKeys[key]
             if self.isCtrl and not self.isShift and key in self.numbersKeys:
                 self.collectorCtrl += self.numbersKeys[key]
         else:
             match key:
                 case self.SHIFT:
                     if self.collectorShift:
-                        self.App.set_uniform(self.prog, "_texture",
-                                             int(self.collectorShift))
-                        self.isRender = True
-                        self.setChannels(self.collectorCtrl)
+                        self.setTextureId(int(self.collectorShift))
                     else:
                         self.isRender = False
                         self.setStandardChannels()
@@ -186,7 +246,7 @@ class DeBug:
                     self.isShift = False
                 case self.CTRL:
                     if self.isCtrl:
-                        self.setChannelsFromCollector()
+                        self.currentCtrlMode.finalizer()
 
     def render(self):
         if self.isRender:

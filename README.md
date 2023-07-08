@@ -94,10 +94,22 @@ display texture deactivate
 
 #### how to manage
 
+manipulation algorithm
+
+hold down <kbd>CTRL</kbd> then
+press a special button then
+enter kode then
+stop pressing <kbd>CTRL</kbd>
+
+press order (press special button and enter kode) is not important  
+you can press a special button in the middle of writing code  
+only the last pressed a special button is important
+
 ##### manage RGB channels
 
 hold down <kbd>CTRL</kbd> then
-enter kode RGB mod then
+press <kbd>C</kbd> then
+enter RGB kode then
 stop pressing <kbd>CTRL</kbd>
 
 how is encoded RGB mod:
@@ -132,8 +144,10 @@ how to type fast large codes if blocks same
 
 
 hold down <kbd>CTRL</kbd> then 
+press <kbd>C</kbd> then
 enter kode one block then 
-pinch <kbd>S</kbd> 
+press <kbd>S</kbd>  
+Necessarily press <kbd>C</kbd> then press <kbd>S</kbd>
 
 
 ### display Ants
