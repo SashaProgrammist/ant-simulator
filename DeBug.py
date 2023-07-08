@@ -35,6 +35,7 @@ class DeBug:
         self.textureId = 0
         self.possibleToSet.append("textureId")
         self.setStandardChannels()
+        self.setStandardAlfa()
 
         self.isRender = False
         self.isRenderAnt = True
@@ -48,7 +49,9 @@ class DeBug:
         self.defaultCtrlMode = CtrlMode(self, "default",
                                         self.resetCollectorCtrl)
         self.colorCtrlMode = CtrlMode(self, "color",
-                                        self.setChannelsFromCollector)
+                                      self.setChannelsFromCollector)
+        self.alfaCtrlMode = CtrlMode(self, "alfa",
+                                     self.setAlfaFromCollector)
         self.currentCtrlMode = self.defaultCtrlMode
 
         self.collectorCtrl = ""
@@ -121,7 +124,27 @@ class DeBug:
         if "textureId" in kwargs:
             self.setTextureId(kwargs["textureId"])
 
+    def setAlfa(self, code: str):
+        code = self.leaveLastsBlock(2, code)
+
+        countPoint = code.count('.')
+        numerator, *denominators = code.split('/')
+
+        if numerator.count('.') != countPoint:
+            logger.exception("incorrect input")
+            return
+
+        number = float(numerator or '1')
+        for denominator in denominators:
+            number /= int(denominator)
+
+        logger.info(f"setAlfa: {number}")
+
+        self.App.set_uniform(self.prog, "alfa", number)
+
     def setChannels(self, code: str):
+        code = code.replace('/', '_')
+
         countPoint = code.count('.')
         if countPoint < 2:
             code = code.replace('.', '_')
@@ -187,9 +210,18 @@ class DeBug:
     def setStandardChannels(self):
         self.setChannels("rgb")
 
+    def setStandardAlfa(self):
+        self.setAlfa("1")
+
     def setChannelsFromCollector(self):
         if self.isRender:
             self.setChannels(self.collectorCtrl)
+        self.collectorCtrl = ''
+        self.isCtrl = False
+
+    def setAlfaFromCollector(self):
+        if self.isRender:
+            self.setAlfa(self.collectorCtrl)
         self.collectorCtrl = ''
         self.isCtrl = False
 
@@ -199,13 +231,19 @@ class DeBug:
                              self.textureId)
         self.isRender = True
         self.setStandardChannels()
+        self.setStandardAlfa()
 
     def resetCollectorCtrl(self):
         self.collectorCtrl = ''
 
-    def leaveLastsBlock(self, countBlock=1):
-        if self.collectorCtrl.count('.') >= countBlock:
-            self.collectorCtrl = '.'.join(self.collectorCtrl.split('.')[-countBlock:])
+    def leaveLastsBlock(self, countBlock=1, code: str = None):
+        if code is None:
+            if self.collectorCtrl.count('.') >= countBlock:
+                self.collectorCtrl = '.'.join(self.collectorCtrl.split('.')[-countBlock:])
+        else:
+            if code.count('.') >= countBlock:
+                return '.'.join(code.split('.')[-countBlock:])
+            return code
 
     def key_event(self, key, action, *_):
         if action == self.actionPress:
@@ -213,7 +251,10 @@ class DeBug:
                 case self.SHIFT:
                     self.isShift = True
                 case self.A:
-                    self.isRenderAnt = not self.isRenderAnt
+                    if not self.isCtrl:
+                        self.isRenderAnt = not self.isRenderAnt
+                    else:
+                        self.currentCtrlMode = self.alfaCtrlMode
                 case self.W:
                     self.isRenderPheromoneWar = not self.isRenderPheromoneWar
                 case self.C:

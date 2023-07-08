@@ -22,17 +22,17 @@ mapp_direction внутри стен
 отображение ввода дебага 
 
 - [ ] start 20:22 07.07  
-ants_transform_direction от времени 
-
-- [ ] start 9:08 08.07
-задание альфы в дебаг 
+ants_transform_direction от времени  
 
 Выполненные
 
-- [x] start 7:32 07.07 end 22:42 07.07
+- [x] start 9:08 08.07 end 14:48 08.07  
+задание альфы в дебаг 
+
+- [x] start 7:32 07.07 end 22:42 07.07  
 возможность не удалять в animation/animationTemp и задать имя удалить только имя
 
-- [x] start 15:39 06.07  end 21:51 07.07
+- [x] start 15:39 06.07  end 21:51 07.07  
 выделить saveAnimation
 
 - [x] start 10:14 07.07  end 13:51 07.07  

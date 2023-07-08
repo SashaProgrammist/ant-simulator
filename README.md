@@ -112,6 +112,8 @@ press <kbd>C</kbd> then
 enter RGB kode then
 stop pressing <kbd>CTRL</kbd>
 
+press <kbd>SLASH</kbd> perceived as <kbd>SPACE</kbd> 
+
 how is encoded RGB mod:
 
 ###### short codes
@@ -149,6 +151,21 @@ enter kode one block then
 press <kbd>S</kbd>  
 Necessarily press <kbd>C</kbd> then press <kbd>S</kbd>
 
+##### manage Alfa channel
+
+hold down <kbd>CTRL</kbd> then
+press <kbd>A</kbd> then
+enter alfa kode then
+stop pressing <kbd>CTRL</kbd>
+
+code should look like this  
+{numerator}/{denominator1}/.../{denominatorN}  
+numerator - decimal or integer  
+denominators - integer  
+the numerator will be divided by all the denominators. 
+alpha channel will be equal to this value
+
+---
 
 ### display Ants
 
