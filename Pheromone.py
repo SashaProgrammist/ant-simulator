@@ -36,6 +36,7 @@ class Pheromone:
 
         self.windowSize = tuple(int(size * self.windowSkele)
                                 for size in self.App.window_size)
+        self.countChanel = 3 if not self.isPheromoneWar else 1
         self.texture: mgl.Texture = self.createTexture()
         self.idTexture = Pheromone.countPheromone + self.App.mapp.countTextures
         self.texture.use(self.idTexture)
@@ -85,7 +86,7 @@ class Pheromone:
             Pheromone.pheromonesWar.append(self)
 
     def createTexture(self):
-        return self.App.ctx.texture(self.windowSize, 3, dtype="f1")
+        return self.App.ctx.texture(self.windowSize, self.countChanel, dtype="f1")
 
     def initAnts(self):
         buffers = self.App.ants.buffers
