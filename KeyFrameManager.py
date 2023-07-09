@@ -107,29 +107,38 @@ class KeyFrameManager:
         for keyFrame in self.keyFrames:
             changeable = changeable.union(set(keyFrame.kwargs))
 
-        if self.keyFrames and self.keyFrames[0].frameIndex != 0:
-            first = KeyFrame(0, {chang: None for chang in changeable})
+        if self.keyFrames:
+            if self.keyFrames[0].frameIndex != 0:
+                first = KeyFrame(0, {chang: None for chang in changeable})
+                self.keyFrames.insert(0, first)
+            else:
+                for chang in changeable:
+                    if chang not in self.keyFrames[0].kwargs:
+                        self.keyFrames[0].kwargs[chang] = None
             i = 0
-            while any(map(lambda var: var is None, first.kwargs.values())):
+            while any(map(lambda var: var is None, self.keyFrames[0].kwargs.values())):
                 for chang in self.keyFrames[i].kwargs:
-                    if first.kwargs[chang] is None:
-                        first.kwargs[chang] = self.keyFrames[i].kwargs[chang]
-
+                    if self.keyFrames[0].kwargs[chang] is None:
+                        self.keyFrames[0].kwargs[chang] = self.keyFrames[i].kwargs[chang]
                 i += 1
-            self.keyFrames.insert(0, first)
 
         countFrame = self.saveAnimation.countFrame
 
-        if self.keyFrames and self.keyFrames[-1].frameIndex != countFrame - 1:
-            end = KeyFrame(countFrame - 1, {chang: None for chang in changeable})
+        if self.keyFrames:
+            if self.keyFrames[-1].frameIndex != countFrame - 1:
+                end = KeyFrame(countFrame - 1, {chang: None for chang in changeable})
+                self.keyFrames.append(end)
+            else:
+                for chang in changeable:
+                    if chang not in self.keyFrames[-1].kwargs:
+                        self.keyFrames[-1].kwargs[chang] = None
             i = -1
-            while any(map(lambda var: var is None, end.kwargs.values())):
+            while any(map(lambda var: var is None, self.keyFrames[-1].kwargs.values())):
                 for chang in self.keyFrames[i].kwargs:
-                    if end.kwargs[chang] is None:
-                        end.kwargs[chang] = self.keyFrames[i].kwargs[chang]
+                    if self.keyFrames[-1].kwargs[chang] is None:
+                        self.keyFrames[-1].kwargs[chang] = self.keyFrames[i].kwargs[chang]
 
                 i -= 1
-            self.keyFrames.append(end)
 
         for chang in changeable:
             self.interpolators[chang] = \

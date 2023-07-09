@@ -8,35 +8,36 @@ if __name__ == '__main__':
     if saveAnimation:
         keyFrameManager = KeyFrameManager()
 
-        keyFrameManager.addKeyFrame(100, **{
-            PosibleToSet.alfa: 0,
+        keyFrameManager.addKeyFrame(0, **{
             PosibleToSet.texture: 3})
-        keyFrameManager.addKeyFrame(200, **{
+        keyFrameManager.addKeyFrame(10, **{
+            PosibleToSet.alfa: 0})
+        keyFrameManager.addKeyFrame(20, **{
             PosibleToSet.alfa: 1,
             PosibleToSet.isRenderAnt: True})
-        keyFrameManager.addKeyFrame(300, **{
+        keyFrameManager.addKeyFrame(30, **{
             PosibleToSet.isRenderAnt: False,
             PosibleToSet.channels: "rgb"})
-        keyFrameManager.addKeyFrame(400, **{
+        keyFrameManager.addKeyFrame(40, **{
             PosibleToSet.isRenderAnt: False,
-            PosibleToSet.channels: "r.."})
-        keyFrameManager.addKeyFrame(500, **{
-            PosibleToSet.isRenderAnt: False,
-            PosibleToSet.channels: "rgb"})
-        keyFrameManager.addKeyFrame(600, **{
-            PosibleToSet.isRenderAnt: False,
-            PosibleToSet.channels: ".g."})
-        keyFrameManager.addKeyFrame(700, **{
+            PosibleToSet.channels: "r"})
+        keyFrameManager.addKeyFrame(50, **{
             PosibleToSet.isRenderAnt: False,
             PosibleToSet.channels: "rgb"})
-        keyFrameManager.addKeyFrame(800, **{
+        keyFrameManager.addKeyFrame(60, **{
             PosibleToSet.isRenderAnt: False,
-            PosibleToSet.channels: "..b"})
-        keyFrameManager.addKeyFrame(900, **{
+            PosibleToSet.channels: "g"})
+        keyFrameManager.addKeyFrame(70, **{
+            PosibleToSet.isRenderAnt: False,
+            PosibleToSet.channels: "rgb"})
+        keyFrameManager.addKeyFrame(80, **{
+            PosibleToSet.isRenderAnt: False,
+            PosibleToSet.channels: "b"})
+        keyFrameManager.addKeyFrame(90, **{
             PosibleToSet.isRenderAnt: False,
             PosibleToSet.channels: "rgb"})
 
-        App.saveAnimation(countFrame=1000, name="Test", isSaveSequence=False,
+        App.saveAnimation(countFrame=100, name="Test", isSaveSequence=False,
                           fps=24., fpsSim=60, invisibleFrames=4)
 
         SaveAnimation.setKeyFrameManager(keyFrameManager)
