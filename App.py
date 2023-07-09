@@ -81,7 +81,7 @@ class App(mglw.WindowConfig):
 
         self.countTextures += Pheromone.countPheromone
 
-        self.ants = Ants(self, 100000, pointSize=4, startPosition=(-0.8, 0.8))
+        self.ants = Ants(self, 500000, pointSize=4, startPosition=(-0.8, 0.8))
 
         for pheromone in Pheromone.pheromones:
             pheromone.initAnts()

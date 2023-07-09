@@ -144,7 +144,6 @@ in shader, it looks like [this](resources/shaders/deBag/deBag_fragment_shader.gl
 
 how to type fast large codes if blocks same
 
-
 hold down <kbd>CTRL</kbd> then 
 press <kbd>C</kbd> then
 enter kode one block then 
@@ -164,6 +163,8 @@ numerator - decimal or integer
 denominators - integer  
 the numerator will be divided by all the denominators. 
 alpha channel will be equal to this value
+
+[examples](examples/examples%20alfa%20mode.md#examples-alfa-mode)
 
 ---
 

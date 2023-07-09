@@ -20,6 +20,15 @@ class CtrlMode:
         self.deBug.currentCtrlMode = self.deBug.defaultCtrlMode
 
 
+class PosibleToSet:
+    channels = "channels"
+    isRenderAnt = "isRenderAnt"
+    isRenderPheromoneWar = "isRenderPheromoneWar"
+    color = "color"
+    alfa = "alfa"
+    texture = "texture"
+
+
 class DeBug:
     SHIFT = 65505
     CTRL = 65507
@@ -32,26 +41,27 @@ class DeBug:
         self.prog = self.App.load_program(
             vertex_shader='shaders/deBag/deBag_vertex_shader.glsl',
             fragment_shader='shaders/deBag/deBag_fragment_shader.glsl')
-        self.textureId = 0
-        self.possibleToSet.append("textureId")
+        self.possibleToSet.append(PosibleToSet.texture)
         self.setStandardChannels()
         self.setStandardAlfa()
 
         self.isRender = False
         self.isRenderAnt = True
-        self.possibleToSet.append("isRenderAnt")
+        self.possibleToSet.append(PosibleToSet.isRenderAnt)
         self.isRenderPheromoneWar = True
-        self.possibleToSet.append("isRenderPheromoneWar")
+        self.possibleToSet.append(PosibleToSet.isRenderPheromoneWar)
 
         self.isCtrl = False
         self.isShift = False
 
         self.defaultCtrlMode = CtrlMode(self, "default",
                                         self.resetCollectorCtrl)
-        self.colorCtrlMode = CtrlMode(self, "color",
+        self.colorCtrlMode = CtrlMode(self, PosibleToSet.color,
                                       self.setChannelsFromCollector)
-        self.alfaCtrlMode = CtrlMode(self, "alfa",
+        self.possibleToSet.append(PosibleToSet.color)
+        self.alfaCtrlMode = CtrlMode(self, PosibleToSet.alfa,
                                      self.setAlfaFromCollector)
+        self.possibleToSet.append(PosibleToSet.alfa)
         self.currentCtrlMode = self.defaultCtrlMode
 
         self.collectorCtrl = ""
@@ -121,10 +131,20 @@ class DeBug:
             else:
                 raise Exception(f"{atr} = {kwargs[atr]} is not possible to set")
 
-        if "textureId" in kwargs:
-            self.setTextureId(kwargs["textureId"])
+        if PosibleToSet.texture in kwargs:
+            self.setTexture(kwargs[PosibleToSet.texture])
 
-    def setAlfa(self, code: str):
+        if PosibleToSet.channels in kwargs:
+            self.setChannels(kwargs[PosibleToSet.channels])
+
+        if PosibleToSet.alfa in kwargs:
+            self.setAlfa(kwargs[PosibleToSet.alfa])
+
+    def setAlfa(self, code: str | float | int):
+        if isinstance(code, (float, int)):
+            self.App.set_uniform(self.prog, "alfa", float(code))
+            return
+
         code = self.leaveLastsBlock(2, code)
 
         countPoint = code.count('.')
@@ -142,7 +162,23 @@ class DeBug:
 
         self.App.set_uniform(self.prog, "alfa", number)
 
-    def setChannels(self, code: str):
+    def setChannels(self, code: str | np.ndarray):
+        if isinstance(code, np.ndarray):
+            if code.shape == (3,):
+                for i, channel in zip(range(3), ('R', 'G', 'B')):
+                    zeros = np.zeros(3)
+                    zeros[i] = code[i]
+                    self.App.set_uniform(self.prog, f"channel{channel}",
+                                         zeros)
+            elif code.shape == (3, 3):
+                for i, channel in zip(range(3), ('R', 'G', 'B')):
+                    self.App.set_uniform(self.prog, f"channel{channel}",
+                                         code[i])
+            else:
+                logger.error(f"wrong code {code}")
+
+            return
+
         code = code.replace('/', '_')
 
         countPoint = code.count('.')
@@ -205,7 +241,7 @@ class DeBug:
 
         for channel, value in channels.items():
             self.App.set_uniform(self.prog, f"channel{channel.upper()}",
-                                 tuple(value))
+                                 value)
 
     def setStandardChannels(self):
         self.setChannels("rgb")
@@ -225,10 +261,9 @@ class DeBug:
         self.collectorCtrl = ''
         self.isCtrl = False
 
-    def setTextureId(self, newId):
-        self.textureId = newId
+    def setTexture(self, newId):
         self.App.set_uniform(self.prog, "_texture",
-                             self.textureId)
+                             newId)
         self.isRender = True
         self.setStandardChannels()
         self.setStandardAlfa()
@@ -279,7 +314,7 @@ class DeBug:
             match key:
                 case self.SHIFT:
                     if self.collectorShift:
-                        self.setTextureId(int(self.collectorShift))
+                        self.setTexture(int(self.collectorShift))
                     else:
                         self.isRender = False
                         self.setStandardChannels()
