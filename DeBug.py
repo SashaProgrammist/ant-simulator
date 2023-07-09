@@ -24,7 +24,6 @@ class PosibleToSet:
     channels = "channels"
     isRenderAnt = "isRenderAnt"
     isRenderPheromoneWar = "isRenderPheromoneWar"
-    color = "color"
     alfa = "alfa"
     texture = "texture"
 
@@ -56,9 +55,9 @@ class DeBug:
 
         self.defaultCtrlMode = CtrlMode(self, "default",
                                         self.resetCollectorCtrl)
-        self.colorCtrlMode = CtrlMode(self, PosibleToSet.color,
+        self.colorCtrlMode = CtrlMode(self, PosibleToSet.channels,
                                       self.setChannelsFromCollector)
-        self.possibleToSet.append(PosibleToSet.color)
+        self.possibleToSet.append(PosibleToSet.channels)
         self.alfaCtrlMode = CtrlMode(self, PosibleToSet.alfa,
                                      self.setAlfaFromCollector)
         self.possibleToSet.append(PosibleToSet.alfa)
@@ -125,7 +124,7 @@ class DeBug:
 
     def set(self, **kwargs):
         for atr in kwargs:
-            if atr is self.possibleToSet:
+            if atr in self.possibleToSet:
                 if hasattr(self, atr):
                     setattr(self, atr, kwargs[atr])
             else:
@@ -162,23 +161,8 @@ class DeBug:
 
         self.App.set_uniform(self.prog, "alfa", number)
 
-    def setChannels(self, code: str | np.ndarray):
-        if isinstance(code, np.ndarray):
-            if code.shape == (3,):
-                for i, channel in zip(range(3), ('R', 'G', 'B')):
-                    zeros = np.zeros(3)
-                    zeros[i] = code[i]
-                    self.App.set_uniform(self.prog, f"channel{channel}",
-                                         zeros)
-            elif code.shape == (3, 3):
-                for i, channel in zip(range(3), ('R', 'G', 'B')):
-                    self.App.set_uniform(self.prog, f"channel{channel}",
-                                         code[i])
-            else:
-                logger.error(f"wrong code {code}")
-
-            return
-
+    @staticmethod
+    def strCodeToNdarray(code: str):
         code = code.replace('/', '_')
 
         countPoint = code.count('.')
@@ -237,11 +221,34 @@ class DeBug:
                 if sums[i]:
                     channel[i] /= sums[i]
 
-        logger.info(f"setChannels: \n{channels}")
+        return np.array([channels['r'], channels['g'], channels['b']])
 
-        for channel, value in channels.items():
-            self.App.set_uniform(self.prog, f"channel{channel.upper()}",
-                                 value)
+    def setChannels(self, code: str | np.ndarray):
+        if isinstance(code, str):
+            code = self.strCodeToNdarray(code)
+
+        channels = dict()
+
+        if not isinstance(code, np.ndarray):
+            logger.error(f"wrong code {code}")
+            return
+
+        if code.shape == (3,):
+            for i, channel in zip(range(3), ('R', 'G', 'B')):
+                zeros = np.zeros(3)
+                zeros[i] = code[i]
+                channels[channel] = zeros
+                self.App.set_uniform(self.prog, f"channel{channel}",
+                                     zeros)
+        elif code.shape == (3, 3):
+            for i, channel in zip(range(3), ('R', 'G', 'B')):
+                channels[channel] = code[i]
+                self.App.set_uniform(self.prog, f"channel{channel}",
+                                     code[i])
+        else:
+            logger.error(f"wrong shape code {code}")
+
+        logger.info(f"setChannels: \n{channels}")
 
     def setStandardChannels(self):
         self.setChannels("rgb")

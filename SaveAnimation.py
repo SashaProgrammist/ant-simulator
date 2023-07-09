@@ -4,6 +4,8 @@ import os
 import shutil
 import cv2
 
+from KeyFrameManager import KeyFrameManager
+
 
 def delInFolderFrameWithName(folder, name):
     for filename in os.listdir(folder):
@@ -21,6 +23,31 @@ def delInFolderFrameWithName(folder, name):
 class SaveAnimation:
     self = None
     oldClose = None
+
+    @classmethod
+    def setKeyFrameManager(cls, keyFrameManager: KeyFrameManager):
+        old__init__ = cls.__init__
+
+        def new__init__(self, App, countFrame, name,
+                        fps, fpsSim, invisibleFrames, isSaveSequence):
+            old__init__(self, App, countFrame, name,
+                        fps, fpsSim, invisibleFrames, isSaveSequence)
+
+            keyFrameManager.set(self, App)
+
+            keyFrameManager.build()
+
+        cls.__init__ = new__init__
+
+        oldRender = cls.render
+
+        def newRender(self: cls):
+            if self.indexFrame < self.countFrame:
+                keyFrameManager.setFrame()
+
+            oldRender(self)
+
+        cls.render = newRender
 
     def __init__(self, App, countFrame, name,
                  fps, fpsSim, invisibleFrames, isSaveSequence):
