@@ -21,7 +21,7 @@ mapp_direction внутри стен
 - [ ] start 20:22 07.07  
 ants_transform_direction от времени  
 
-- [ ] start 12:16  
+- [ ] start 12:16 08.07
 добавить прозрачности муравьям
 
 Выполненные
