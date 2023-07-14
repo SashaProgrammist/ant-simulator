@@ -27,6 +27,9 @@ ants_transform_direction от времени
 - [ ] start 15:16 10.07  
 поток воды через mapp_direction
 
+- [ ] start 12:04 14.07  
+отключать где не нужно смешение 
+
 выполненые 
 
 - [x] start 23:13 06.07 end 20:49  
