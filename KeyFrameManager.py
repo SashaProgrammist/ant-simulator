@@ -9,14 +9,17 @@ class KeyFrame:
         self.kwargs: dict = kwargs
 
         if PosibleToSet.channels in self.kwargs and \
-                self.kwargs[PosibleToSet.channels] is not None:
+                isinstance(self.kwargs[PosibleToSet.channels], str):
             self.kwargs[PosibleToSet.channels] = \
                 DeBug.strCodeToNdarray(self.kwargs[PosibleToSet.channels])
 
-        if PosibleToSet.alfa in self.kwargs and \
-                self.kwargs[PosibleToSet.alfa] is not None:
-            self.kwargs[PosibleToSet.alfa] = \
-                float(self.kwargs[PosibleToSet.alfa])
+        if PosibleToSet.alfa in self.kwargs:
+            alfa = self.kwargs[PosibleToSet.alfa]
+            if isinstance(alfa, str):
+                self.kwargs[PosibleToSet.alfa] = \
+                    DeBug.strCodeToFloat(alfa)
+            elif isinstance(alfa, int):
+                self.kwargs[PosibleToSet.alfa] = float(alfa)
 
     def __repr__(self):
         return f"(frameIndex = {self.frameIndex}, kwargs =\n{self.kwargs})"

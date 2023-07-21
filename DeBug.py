@@ -264,20 +264,19 @@ class DeBug:
     def setChannelsFromCollector(self):
         if self.isRender:
             self.setChannels(self.collectorCtrl)
-        self.collectorCtrl = ''
+        self.resetCollectorCtrl()
         self.isCtrl = False
 
     def setAlfaFromCollector(self):
         if self.isRender:
             self.setAlfa(self.collectorCtrl)
-        self.collectorCtrl = ''
+        self.resetCollectorCtrl()
         self.isCtrl = False
 
     def setTexture(self, newId):
         self.App.set_uniform(self.prog, "_texture",
                              newId)
         self.isRender = True
-        self.setStandardChannels()
         self.setStandardAlfa()
 
     def resetCollectorCtrl(self):
