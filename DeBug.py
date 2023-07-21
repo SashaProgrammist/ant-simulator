@@ -71,19 +71,19 @@ class DeBug:
             self.App.wnd.keys.G: "g",
             self.App.wnd.keys.B: "b",
             self.App.wnd.keys.SPACE: "_",
-            65454: '.',  # numpad
             47: '.',  # English layout
+            65454: '.',  # numpad
             816043786240: '.',  # Russian layout
             self.App.wnd.keys.SLASH: '/',  # English layout
             65455: '/',  # numpad
             92: '/'}  # Russian layout
-        self.numpadNumbers = [
+        self.numpadCtrlNumbers = [  # numpad numbers when the control is pressed
             65379,       65367, 65364, 65366, 65361,
             51539607552, 65363, 65360, 65362, 65365]
         self.numbersKeys = {
             keys: str(i) for i, keys in
             chain(enumerate(range(self.number0, self.number9 + 1)),
-                  enumerate(self.numpadNumbers),
+                  enumerate(self.numpadCtrlNumbers),
                   enumerate(range(self.numpad0, self.numpad9 + 1)))}
 
     @property
@@ -139,12 +139,9 @@ class DeBug:
         if PosibleToSet.alfa in kwargs:
             self.setAlfa(kwargs[PosibleToSet.alfa])
 
-    def setAlfa(self, code: str | float | int):
-        if isinstance(code, (float, int)):
-            self.App.set_uniform(self.prog, "alfa", float(code))
-            return
-
-        code = self.leaveLastsBlock(2, code)
+    @staticmethod
+    def strCodeToFloat(code: str):
+        code = DeBug.leaveLastsBlock(code, 2)
 
         countPoint = code.count('.')
         numerator, *denominators = code.split('/')
@@ -156,6 +153,14 @@ class DeBug:
         number = float(numerator or '1')
         for denominator in denominators:
             number /= int(denominator)
+
+        return number
+
+    def setAlfa(self, code: str | float | int):
+        if isinstance(code, str):
+            number = self.strCodeToFloat(code)
+        else:
+            number = float(code)
 
         logger.info(f"setAlfa: {number}")
 
@@ -230,7 +235,7 @@ class DeBug:
         channels = dict()
 
         if not isinstance(code, np.ndarray):
-            logger.error(f"wrong code {code}")
+            logger.error(f"wrong code class {code.__class__}")
             return
 
         if code.shape == (3,):
@@ -278,14 +283,11 @@ class DeBug:
     def resetCollectorCtrl(self):
         self.collectorCtrl = ''
 
-    def leaveLastsBlock(self, countBlock=1, code: str = None):
-        if code is None:
-            if self.collectorCtrl.count('.') >= countBlock:
-                self.collectorCtrl = '.'.join(self.collectorCtrl.split('.')[-countBlock:])
-        else:
-            if code.count('.') >= countBlock:
-                return '.'.join(code.split('.')[-countBlock:])
-            return code
+    @staticmethod
+    def leaveLastsBlock(code, countBlock=1):
+        if code.count('.') >= countBlock:
+            return '.'.join(code.split('.')[-countBlock:])
+        return code
 
     def key_event(self, key, action, *_):
         if action == self.actionPress:
@@ -306,7 +308,7 @@ class DeBug:
                     self.isCtrl = True
                 case self.S:
                     if self.isCtrl and self.currentCtrlMode == self.colorCtrlMode:
-                        self.leaveLastsBlock()
+                        self.collectorCtrl = self.leaveLastsBlock(self.collectorCtrl)
                         self.collectorCtrl = '.'.join([self.collectorCtrl] * 3)
                         self.currentCtrlMode.finalizer()
 
