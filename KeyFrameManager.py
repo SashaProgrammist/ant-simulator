@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Callable
 
 from DeBug import DeBug, PosibleToSet
 
@@ -79,7 +80,8 @@ class Interpolator:
 
 
 class KeyFrameManager:
-    def __init__(self, interpolationFunction=lambda x: x * x * (3 - 2 * x)):
+    def __init__(self,
+                 interpolationFunction: Callable[[float], float] = lambda x: x * x * (3 - 2 * x)):
         self.saveAnimation = None
         self.App = None
         self.interFunc = interpolationFunction

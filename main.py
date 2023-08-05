@@ -2,7 +2,7 @@ from App import *
 from KeyFrameManager import KeyFrameManager
 from DeBug import PosibleToSet
 
-saveAnimation = True
+saveAnimation = False
 
 if __name__ == '__main__':
     if saveAnimation:
@@ -19,22 +19,16 @@ if __name__ == '__main__':
             PosibleToSet.isRenderAnt: False,
             PosibleToSet.channels: "rgb"})
         keyFrameManager.addKeyFrame(40, **{
-            PosibleToSet.isRenderAnt: False,
             PosibleToSet.channels: "r"})
         keyFrameManager.addKeyFrame(50, **{
-            PosibleToSet.isRenderAnt: False,
             PosibleToSet.channels: "rgb"})
         keyFrameManager.addKeyFrame(60, **{
-            PosibleToSet.isRenderAnt: False,
             PosibleToSet.channels: "g"})
         keyFrameManager.addKeyFrame(70, **{
-            PosibleToSet.isRenderAnt: False,
             PosibleToSet.channels: "rgb"})
         keyFrameManager.addKeyFrame(80, **{
-            PosibleToSet.isRenderAnt: False,
             PosibleToSet.channels: "b"})
         keyFrameManager.addKeyFrame(90, **{
-            PosibleToSet.isRenderAnt: False,
             PosibleToSet.channels: "rgb"})
 
         App.saveAnimation(countFrame=100, name="Test", isSaveSequence=False,

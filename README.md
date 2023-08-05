@@ -88,35 +88,13 @@ from DeBug import PosibleToSet
 
 keyFrameManager = KeyFrameManager()
 
-keyFrameManager.addKeyFrame(100, **{
+keyFrameManager.addKeyFrame(120, **{
     PosibleToSet.alfa: 0,
     PosibleToSet.texture: 3})
-keyFrameManager.addKeyFrame(200, **{
-    PosibleToSet.alfa: 1,
-    PosibleToSet.isRenderAnt: True})
-keyFrameManager.addKeyFrame(300, **{
-    PosibleToSet.isRenderAnt: False,
-    PosibleToSet.channels: "rgb"})
-keyFrameManager.addKeyFrame(400, **{
-    PosibleToSet.isRenderAnt: False,
-    PosibleToSet.channels: "r"})
-keyFrameManager.addKeyFrame(500, **{
-    PosibleToSet.isRenderAnt: False,
-    PosibleToSet.channels: "rgb"})
-keyFrameManager.addKeyFrame(600, **{
-    PosibleToSet.isRenderAnt: False,
-    PosibleToSet.channels: "g"})
-keyFrameManager.addKeyFrame(700, **{
-    PosibleToSet.isRenderAnt: False,
-    PosibleToSet.channels: "rgb"})
-keyFrameManager.addKeyFrame(800, **{
-    PosibleToSet.isRenderAnt: False,
-    PosibleToSet.channels: "b"})
-keyFrameManager.addKeyFrame(900, **{
-    PosibleToSet.isRenderAnt: False,
-    PosibleToSet.channels: "rgb"})
+keyFrameManager.addKeyFrame(240, **{
+    PosibleToSet.alfa: 1})
 
-App.saveAnimation(countFrame=1000, 
+App.saveAnimation(countFrame=360, 
                   name="demonstration keyFrameManager",
                   fps=24., fpsSim=60, invisibleFrames=4)
 
@@ -125,7 +103,45 @@ SaveAnimation.setKeyFrameManager(keyFrameManager)
 mglw.run_window_config(App)
 ```
 
-detailed explanations expect in a week
+more complex [example](examples/example%20KeyFrameManager.md#example-keyframemanager-)
+
+### options
+
+#### `init KeyFrameManager`
+
+- `interpolationFunction: Callable[[float], float] = lambda x: x * x * (3 - 2 * x))`  
+interpolation function for interpolated values between keyframes  
+examples:
+  - `lambda x: x` - linear
+  - `lambda x: x * x * (3 - 2 * x))` - simple smooth
+  - `lambda x, k=10: (-exp(k*(x - 1)) - exp(k*(x - 1/2)) + exp(-k/2) + exp(-k))/(-exp(k*(x - 1/2)) + exp(k*(x - 3/2)) - 1 + exp(-k))` -
+  smooth (`k` - smoothing factor)  
+  here is a [link](https://www.desmos.com/calculator/wxt2aa6nb2?lang=ru) to look at the function in desmos
+
+#### `addKeyFrame`
+
+- `frameIndex: int`  
+the index of the frame to which the keyframe is applied
+- posible to set:
+  - `PosibleToSet.channels : str | ndarray` -
+    - if `str` the value will be decoded according to [these](#manage-rgb-channels) rules
+    - if `ndarray` array shape must be (3, 3) or (3, )
+      - (3, 3) shape - new color = channels.T * color
+      - (3, ) shape - the array is converted into a matrix of the form (3, 3) where the values on the main diagonal will be equal to the original ones
+  - `PosibleToSet.isRenderAnt : bool` -  
+    - if `True` ants will render
+    - if `False` ants will not render
+  - `PosibleToSet.isRenderPheromoneWar : bool` -  
+    - if `True` PheromoneWar will render
+    - if `False` PheromoneWar will not render
+  - `PosibleToSet.alfa : float | int` -  
+    the value of the alpha channel of the texture displayed by the debug
+  - `PosibleToSet.texture : int` -  
+    index the texture displayed by the debug
+
+### result
+
+video save in [animation/saveAnimation](animation/saveAnimation). it will change the parameters according to the keyframes
 
 ---
 
