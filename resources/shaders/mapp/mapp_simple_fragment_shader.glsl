@@ -7,7 +7,10 @@ out vec4 fragColor;
 
 void main() {
     vec4 color = texture(mappTexture, v_texCoord);
-    fragColor = vec4(color.rrr, 1);
+    float invert = 1 - color.g;
+    vec4 walls = vec4(color.rrr, 1) * invert;
+    vec4 food = vec4(0, color.g * color.g, 0, 1);
+    fragColor = food + walls;
 
 //    temp
 //    if (color.g > 0.5)
