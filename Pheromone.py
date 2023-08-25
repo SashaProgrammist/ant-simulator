@@ -47,7 +47,7 @@ class Pheromone:
             self.App.ctx.clear(0.5, 0.5)
             self.App.mainFbo.use()
 
-        self.ants: VAO = VAO(self.name, mode=mgl.POINTS)
+        self.ants: VAO = None
 
         self.fullScreen = self.App.fullScreen
 
@@ -89,9 +89,7 @@ class Pheromone:
         return self.App.ctx.texture(self.windowSize, self.countChanel, dtype="f1")
 
     def initAnts(self):
-        buffers = self.App.ants.buffers
-        for buffer in buffers:
-            self.ants.buffer(buffer.buffer, buffer.buffer_format, buffer.attributes)
+        self.ants = self.App.ants.ants
 
     def addAntipode(self, newAntipode):
         self.antipodes.append(newAntipode)
