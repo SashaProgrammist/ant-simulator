@@ -33,7 +33,9 @@ class Ants:
         self.ants: VAO | None = None
         self.buffers: list[AntBufferInfo] = []
 
-        self.temporaryStorage = self.App.ctx.buffer(
+        self.temporaryStorage_3bytes = self.App.ctx.buffer(
+            reserve=self.countAnts * 3 * 4)
+        self.temporaryStorage_2bytes = self.App.ctx.buffer(
             reserve=self.countAnts * 2 * 4)
 
         self.ants_graphic_prog = self.App.load_program(
@@ -46,15 +48,29 @@ class Ants:
         self.ants_transform_direction_prog = self.App.load_program(
             vertex_shader='shaders/ants/ants_transform_direction.glsl',
             varyings=["out_direction"])
+        self.ants_transform_changePheromone_prog = self.App.load_program(
+            vertex_shader='shaders/ants/ants_transform_changePheromone.glsl',
+            varyings=["out_pheromoneControlIndex",
+                      "out_stackingPheromoneIndex",
+                      "out_isDirectionChanged"]
+        )
 
         self.App.mapp.set_uniformTextures(self.ants_transform_direction_prog,
                                           Mapp.mappDirection)
-        for i, pheromone in enumerate(Pheromone.pheromones,
-                                      Mapp.countTextures):
+        for pheromone in Pheromone.pheromones:
             self.App.set_uniform(self.ants_transform_direction_prog,
-                                 pheromone.name, i)
+                                 pheromone.name, pheromone.idTexture)
         self.App.set_uniform(self.ants_transform_direction_prog,
                              "sensitivityThreshold", 1.5 / 255)
+
+        self.App.set_uniform(self.ants_transform_changePheromone_prog,
+                             "foodPheromone", self.App.pheromoneFood.id)
+        self.App.set_uniform(self.ants_transform_changePheromone_prog,
+                             "homePheromone", self.App.pheromoneHome.id)
+        self.App.set_uniform(self.ants_transform_changePheromone_prog,
+                             "homePosition", self.startPosition)
+        self.App.set_uniform(self.ants_transform_changePheromone_prog,
+                             "mappTexture", App.mapp.textures[Mapp.mappTexture].index)
 
         self.initAnts()
 
@@ -73,27 +89,35 @@ class Ants:
         else:
             positionData = np.array(self.startPosition * self.countAnts,
                                     dtype=np.float32).T.reshape((self.countAnts * 2,))
-        self.ants.buffer(positionData, "2f", ["in_position"])
+        self.ants.buffer(positionData,
+                         "2f",
+                         ["in_position"])
         self.buffers.append(AntBufferInfo(
             self.ants.get_buffer_by_name("in_position"), "2f"))
 
         angelData = np.random.random(self.countAnts) * 2 * math.pi
         directionData = np.array([np.cos(angelData), np.sin(angelData)],
                                  dtype=np.float32).T.reshape((self.countAnts * 2,))
-        self.ants.buffer(directionData, "2f", ["in_direction"])
+        self.ants.buffer(directionData,
+                         "2f",
+                         ["in_direction"])
         self.buffers.append(AntBufferInfo(
             self.ants.get_buffer_by_name("in_direction"), "2f"))
 
         speedData = np.array(np.random.random(self.countAnts) *
                              (Ants.maxSpeed - Ants.minSpeed) + Ants.minSpeed,
                              dtype=np.float32)
-        self.ants.buffer(speedData, "1f", ["in_speed"])
+        self.ants.buffer(speedData,
+                         "1f",
+                         ["in_speed"])
         self.buffers.append(AntBufferInfo(
             self.ants.get_buffer_by_name("in_speed"), "1f"))
 
         stackingPheromoneIndexData = \
             np.array([self.App.pheromoneHome.id] * self.countAnts, dtype=np.float32)
-        self.ants.buffer(stackingPheromoneIndexData, "1f", ["in_stackingPheromoneIndex"])
+        self.ants.buffer(stackingPheromoneIndexData,
+                         "1f",
+                         ["in_stackingPheromoneIndex"])
         self.buffers.append(AntBufferInfo(
             self.ants.get_buffer_by_name("in_stackingPheromoneIndex"), "1f"))
 
@@ -102,6 +126,14 @@ class Ants:
         self.ants.buffer(pheromoneControlIndexData, "1f", ["in_pheromoneControlIndex"])
         self.buffers.append(AntBufferInfo(
             self.ants.get_buffer_by_name("in_pheromoneControlIndex"), "1f"))
+
+        isDirectionChangedData = np.array(np.zeros(self.countAnts),
+                                          dtype=np.float32)
+        self.ants.buffer(isDirectionChangedData,
+                         "1f",
+                         ["in_isDirectionChanged"])
+        self.buffers.append(AntBufferInfo(
+            self.ants.get_buffer_by_name("in_isDirectionChanged"), "1f"))
 
     def set_newResolution(self):
         self.App.set_uniform(self.ants_graphic_prog, "resolution", self.App.window_size)
@@ -118,7 +150,22 @@ class Ants:
         self.App.set_uniform(self.ants_transform_direction_prog, "time", time)
         self.App.set_uniform(self.ants_transform_direction_prog, "frame_time", frame_time)
 
-        self.ants.transform(self.ants_transform_position_prog, self.temporaryStorage)
-        self.ants.get_buffer_by_name("in_position").buffer.write(self.temporaryStorage.read())
-        self.ants.transform(self.ants_transform_direction_prog, self.temporaryStorage)
-        self.ants.get_buffer_by_name("in_direction").buffer.write(self.temporaryStorage.read())
+        self.ants.transform(self.ants_transform_changePheromone_prog,
+                            self.temporaryStorage_3bytes)
+        controlStackingIndex: np.ndarray = \
+            np.frombuffer(self.temporaryStorage_3bytes.read(), dtype=np.float32)
+        (self.ants.get_buffer_by_name("in_pheromoneControlIndex")
+         .buffer.write(np.array(controlStackingIndex[::3]).data))
+        (self.ants.get_buffer_by_name("in_stackingPheromoneIndex")
+         .buffer.write(np.array(controlStackingIndex[1::3]).data))
+        (self.ants.get_buffer_by_name("in_isDirectionChanged")
+         .buffer.write(np.array(controlStackingIndex[2::3]).data))
+
+        self.ants.transform(self.ants_transform_position_prog,
+                            self.temporaryStorage_2bytes)
+        (self.ants.get_buffer_by_name("in_position").
+         buffer.write(self.temporaryStorage_2bytes.read()))
+        self.ants.transform(self.ants_transform_direction_prog,
+                            self.temporaryStorage_2bytes)
+        (self.ants.get_buffer_by_name("in_direction").
+         buffer.write(self.temporaryStorage_2bytes.read()))

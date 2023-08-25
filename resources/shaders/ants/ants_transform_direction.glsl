@@ -9,6 +9,7 @@ in vec2 in_position;
 in vec2 in_direction;
 in float in_index;
 in float in_pheromoneControlIndex;
+in float in_isDirectionChanged;
 uniform float time;
 uniform float frame_time;
 uniform sampler2D mappDirection;
@@ -29,6 +30,10 @@ void rotate(inout vec2 p, float angel) {
 }
 
 void main() {
+    if (in_isDirectionChanged > 0.5) {
+        out_direction = -in_direction;
+        return;
+    }
     vec2 uv = mod((in_position + 1) / 2, 1.);
     vec2 _in_position = uv * 2 - 1;
 
