@@ -6,7 +6,7 @@ from moderngl_window.geometry.attributes import AttributeNames
 from moderngl_window.timers.clock import Timer
 from argparse import Namespace, ArgumentParser
 
-from Ants import Ants
+from Anthill import Anthill
 from Pheromone import Pheromone
 from Mapp import Mapp
 from DeBug import DeBug
@@ -21,7 +21,7 @@ class App(mglw.WindowConfig):
     title = "ant simulator"
     cursor = True
     aspect_ratio = None
-    attributeNames = AttributeNames(texcoord_0="in_texCoord")
+    attributeNames: AttributeNames = AttributeNames(texcoord_0="in_texCoord")
     clear_color = (1, 1, 1)
     vsync = True
     argv: Namespace = Namespace(window="pyglet")
@@ -70,9 +70,11 @@ class App(mglw.WindowConfig):
 
         self.pheromoneWar = Pheromone(self, name="pheromoneWar", isPheromoneWar=True)
         self.pheromoneHome = Pheromone(self, name="pheromoneHome",
-                                       weathering=0.9, redistribution=0.4,
-                                       pointSize=4)
-        self.pheromoneFood = Pheromone(self, name="pheromoneFood")
+                                       weathering=0.99, redistribution=0.9,
+                                       pointSize=4, redistributionRadius=5)
+        self.pheromoneFood = Pheromone(self, name="pheromoneFood",
+                                       weathering=0.99, redistribution=0.9,
+                                       pointSize=4, redistributionRadius=5)
 
         self.pheromoneHome.addAntipode(self.pheromoneFood)
         self.pheromoneFood.addAntipode(self.pheromoneHome)
@@ -81,7 +83,13 @@ class App(mglw.WindowConfig):
 
         self.countTextures += Pheromone.countPheromone
 
-        self.ants = Ants(self, 500000, pointSize=4, startPosition=(-0.8, 0.8))
+        self.anthill = Anthill(App=self,
+                               countAnt=500000,
+                               position=(-0.85, 0.8),
+                               size=0.07,
+                               pointSize=4,
+                               )
+        self.ants = self.anthill.ants
 
         for pheromone in Pheromone.pheromones:
             pheromone.initAnts()
@@ -104,12 +112,14 @@ class App(mglw.WindowConfig):
     def set_newResolution(self):
         self.mapp.set_newResolution()
         self.ants.set_newResolution()
+        self.anthill.set_newResolution()
         for pheromone in Pheromone.pheromones:
             pheromone.set_newResolution()
 
     def renderVao(self):
         self.mapp.render()
         self.deBug.render()
+        self.anthill.render()
         if self.deBug.isRenderAnt:
             self.ants.render()
         if self.deBug.isRenderPheromoneWar:
