@@ -15,7 +15,7 @@ void main() {
         vec2 uv = (in_position + 1) / 2;
         float food_in = texture(mappTexture, uv).g;
 
-        if (food_in > 0.) {
+        if (food_in > 0.05) {
             out_pheromoneControlIndex = homePheromone;
             out_isDirectionChanged = 1;
         } else {
@@ -23,7 +23,7 @@ void main() {
             out_pheromoneControlIndex = foodPheromone;
         }
     } else {
-        if (length(in_position - homePosition) < 0.05) {
+        if (length(in_position - homePosition) < 0.09) {
             out_isDirectionChanged = 1;
             out_pheromoneControlIndex = foodPheromone;
         } else {

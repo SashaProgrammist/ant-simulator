@@ -55,6 +55,9 @@ class Ants:
                       "out_isDirectionChanged"]
         )
 
+        self.App.set_uniform(self.ants_graphic_prog, "foodPheromone",
+                             self.App.pheromoneFood.id)
+
         self.App.mapp.set_uniformTextures(self.ants_transform_direction_prog,
                                           Mapp.mappDirection)
         for pheromone in Pheromone.pheromones:
@@ -69,8 +72,8 @@ class Ants:
                              "homePheromone", self.App.pheromoneHome.id)
         self.App.set_uniform(self.ants_transform_changePheromone_prog,
                              "homePosition", self.startPosition)
-        self.App.set_uniform(self.ants_transform_changePheromone_prog,
-                             "mappTexture", App.mapp.textures[Mapp.mappTexture].index)
+        self.App.mapp.set_uniformTextures(self.ants_transform_changePheromone_prog,
+                                          Mapp.mappTexture)
 
         self.initAnts()
 

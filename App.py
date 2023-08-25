@@ -85,7 +85,7 @@ class App(mglw.WindowConfig):
 
         self.anthill = Anthill(App=self,
                                countAnt=500000,
-                               position=(-0.85, 0.8),
+                               position=(-0.84, 0.8),
                                size=0.07,
                                pointSize=4,
                                )
@@ -128,6 +128,7 @@ class App(mglw.WindowConfig):
 
     def update(self, time, frame_time):
         self.ants.update(time, frame_time)
+        self.mapp.update()
         for pheromone in Pheromone.pheromones:
             pheromone.update(time, frame_time)
 

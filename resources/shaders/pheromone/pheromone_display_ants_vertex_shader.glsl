@@ -30,8 +30,10 @@ void main() {
         }
     } else if (in_stackingPheromoneIndex != pheromone) {
         gl_Position = vec4(2);
-    } else if (random() > 0.45) {
+    } else if (random() > 0.8) {
         collor.b = 1;
+    } else {
+        collor.b = texture(pheromoneSampler, (v_position + 1) / 2).b;
     }
 
 }

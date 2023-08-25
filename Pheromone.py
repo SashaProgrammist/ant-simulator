@@ -174,7 +174,7 @@ class Pheromone:
                                f"    vec2 vec = _get{pheromone.name}(uv);\n")
                     for antipode in pheromone.antipodes:
                         file.write(f"    vec -= {'_' if antipode.isHaveAntipodes else ''}"
-                                   f"get{antipode.name}(uv) * 0.5;\n")
+                                   f"get{antipode.name}(uv) * 0.05;\n")
                     file.write("    return vec;\n"
                                "}\n\n")
 

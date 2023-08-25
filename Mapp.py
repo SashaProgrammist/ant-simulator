@@ -42,6 +42,11 @@ class Mapp:
             fragment_shader='shaders/mapp/mapp_direction_fragment_shader.glsl')
         self.set_uniformTextures(self.mappDirection_prog, Mapp.mappTexture)
 
+        self.putAwayFood_prog = self.App.load_program(
+            vertex_shader='shaders/mapp/putAwayFood_vertex_shader.glsl',
+            fragment_shader='shaders/mapp/putAwayFood_fragment_shader.glsl')
+        self.set_uniformTextures(self.putAwayFood_prog, Mapp.mappTexture)
+
         self.applyChangeMappTexture()
 
     def applyChangeMappTexture(self):
@@ -63,3 +68,8 @@ class Mapp:
 
     def render(self):
         self.quad.render(self.simple_prog)
+
+    def update(self):
+        self.textures[Mapp.mappTexture].fbo.use()
+        self.App.ants.ants.render(self.putAwayFood_prog)
+        self.App.mainFbo.use()
