@@ -52,8 +52,7 @@ class Ants:
             vertex_shader='shaders/ants/ants_transform_changePheromone.glsl',
             varyings=["out_pheromoneControlIndex",
                       "out_stackingPheromoneIndex",
-                      "out_isDirectionChanged"]
-        )
+                      "out_isDirectionChanged"])
 
         self.App.set_uniform(self.ants_graphic_prog, "foodPheromone",
                              self.App.pheromoneFood.id)

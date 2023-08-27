@@ -69,7 +69,13 @@ class Mapp:
     def render(self):
         self.quad.render(self.simple_prog)
 
-    def update(self):
+    def update(self, time, frame_time):
+        self.App.set_uniform(self.putAwayFood_prog,
+                             "time", time)
+        self.App.set_uniform(self.putAwayFood_prog,
+                             "frame_time", frame_time)
+
         self.textures[Mapp.mappTexture].fbo.use()
+        self.App.ctx.point_size = 3
         self.App.ants.ants.render(self.putAwayFood_prog)
         self.App.mainFbo.use()

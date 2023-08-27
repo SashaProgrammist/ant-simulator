@@ -27,7 +27,7 @@ void main() {
     }
 
     float len = length(color);
-    if (len < 0.1) {
+    if (len < 0.05) {
         color = vec3(0);
     }
 

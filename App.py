@@ -71,10 +71,10 @@ class App(mglw.WindowConfig):
         self.pheromoneWar = Pheromone(self, name="pheromoneWar", isPheromoneWar=True)
         self.pheromoneHome = Pheromone(self, name="pheromoneHome",
                                        weathering=0.99, redistribution=0.9,
-                                       pointSize=4, redistributionRadius=5)
+                                       pointSize=4, redistributionRadius=8)
         self.pheromoneFood = Pheromone(self, name="pheromoneFood",
                                        weathering=0.99, redistribution=0.9,
-                                       pointSize=4, redistributionRadius=5)
+                                       pointSize=4, redistributionRadius=8)
 
         self.pheromoneHome.addAntipode(self.pheromoneFood)
         self.pheromoneFood.addAntipode(self.pheromoneHome)
@@ -128,7 +128,7 @@ class App(mglw.WindowConfig):
 
     def update(self, time, frame_time):
         self.ants.update(time, frame_time)
-        self.mapp.update()
+        self.mapp.update(time, frame_time)
         for pheromone in Pheromone.pheromones:
             pheromone.update(time, frame_time)
 

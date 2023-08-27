@@ -24,8 +24,13 @@ void main() {
     gl_Position = vec4(v_position, 0, 1);
     collor = vec4(-in_direction / 2 + 0.5, 0, frame_time);
 
+    vec3 collorIn = texture(pheromoneSampler, (v_position + 1) / 2).rgb;
+    float factor = collorIn.b * collorIn.b;
+
+    collor.rg = collor.rg * (1 - factor) + collorIn.rg * factor;
+
     if (isPheromoneWar) {
-        if (texture(pheromoneSampler, (v_position + 1) / 2).r > 0.99) {
+        if (collorIn.r > 0.99) {
             gl_Position = vec4(2);
         }
     } else if (in_stackingPheromoneIndex != pheromone) {
@@ -33,7 +38,8 @@ void main() {
     } else if (random() > 0.8) {
         collor.b = 1;
     } else {
-        collor.b = texture(pheromoneSampler, (v_position + 1) / 2).b;
+        collor.b = collorIn.b;
     }
+
 
 }
