@@ -21,6 +21,20 @@ class AntBufferInfo:
         return self._buffer.attributes
 
 
+class TemporaryStorages:
+    def __init__(self, App, ants):
+        self.App = App
+        self.ants = ants
+        self.storages = dict()
+
+    def get(self, countFourBate):
+        if countFourBate not in self.storages:
+            self.storages[countFourBate] = self.App.ctx.buffer(
+                reserve=self.ants.countAnts * countFourBate * 4)
+
+        return self.storages[countFourBate]
+
+
 class Ants:
     minSpeed = 0.2
     maxSpeed = 0.3
@@ -33,10 +47,7 @@ class Ants:
         self.ants: VAO | None = None
         self.buffers: list[AntBufferInfo] = []
 
-        self.temporaryStorage_3bytes = self.App.ctx.buffer(
-            reserve=self.countAnts * 3 * 4)
-        self.temporaryStorage_2bytes = self.App.ctx.buffer(
-            reserve=self.countAnts * 2 * 4)
+        self.temporaryStorages = TemporaryStorages(App, self)
 
         self.ants_graphic_prog = self.App.load_program(
             vertex_shader='shaders/ants/ants_vertex_shader.glsl',
@@ -52,7 +63,8 @@ class Ants:
             vertex_shader='shaders/ants/ants_transform_changePheromone.glsl',
             varyings=["out_pheromoneControlIndex",
                       "out_stackingPheromoneIndex",
-                      "out_isDirectionChanged"])
+                      "out_isDirectionChanged",
+                      "out_time"])
 
         self.App.set_uniform(self.ants_graphic_prog, "foodPheromone",
                              self.App.pheromoneFood.id)
@@ -137,6 +149,11 @@ class Ants:
         self.buffers.append(AntBufferInfo(
             self.ants.get_buffer_by_name("in_isDirectionChanged"), "1f"))
 
+        timeData = np.array(np.zeros(self.countAnts), dtype=np.float32)
+        self.ants.buffer(timeData, "1f", ["in_time"])
+        self.buffers.append(AntBufferInfo(
+            self.ants.get_buffer_by_name("in_time"), "1f"))
+
     def set_newResolution(self):
         self.App.set_uniform(self.ants_graphic_prog, "resolution", self.App.window_size)
 
@@ -151,23 +168,26 @@ class Ants:
         self.App.set_uniform(self.ants_transform_position_prog, "frame_time", frame_time)
         self.App.set_uniform(self.ants_transform_direction_prog, "time", time)
         self.App.set_uniform(self.ants_transform_direction_prog, "frame_time", frame_time)
+        self.App.set_uniform(self.ants_transform_changePheromone_prog, "frame_time", frame_time)
 
         self.ants.transform(self.ants_transform_changePheromone_prog,
-                            self.temporaryStorage_3bytes)
+                            self.temporaryStorages.get(4))
         controlStackingIndex: np.ndarray = \
-            np.frombuffer(self.temporaryStorage_3bytes.read(), dtype=np.float32)
+            np.frombuffer(self.temporaryStorages.get(4).read(), dtype=np.float32)
         (self.ants.get_buffer_by_name("in_pheromoneControlIndex")
-         .buffer.write(np.array(controlStackingIndex[::3]).data))
+         .buffer.write(np.array(controlStackingIndex[::4]).data))
         (self.ants.get_buffer_by_name("in_stackingPheromoneIndex")
-         .buffer.write(np.array(controlStackingIndex[1::3]).data))
+         .buffer.write(np.array(controlStackingIndex[1::4]).data))
         (self.ants.get_buffer_by_name("in_isDirectionChanged")
-         .buffer.write(np.array(controlStackingIndex[2::3]).data))
+         .buffer.write(np.array(controlStackingIndex[2::4]).data))
+        (self.ants.get_buffer_by_name("in_time")
+         .buffer.write(np.array(controlStackingIndex[3::4]).data))
 
         self.ants.transform(self.ants_transform_position_prog,
-                            self.temporaryStorage_2bytes)
+                            self.temporaryStorages.get(2))
         (self.ants.get_buffer_by_name("in_position").
-         buffer.write(self.temporaryStorage_2bytes.read()))
+         buffer.write(self.temporaryStorages.get(2).read()))
         self.ants.transform(self.ants_transform_direction_prog,
-                            self.temporaryStorage_2bytes)
+                            self.temporaryStorages.get(2))
         (self.ants.get_buffer_by_name("in_direction").
-         buffer.write(self.temporaryStorage_2bytes.read()))
+         buffer.write(self.temporaryStorages.get(2).read()))

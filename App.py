@@ -70,10 +70,10 @@ class App(mglw.WindowConfig):
 
         self.pheromoneWar = Pheromone(self, name="pheromoneWar", isPheromoneWar=True)
         self.pheromoneHome = Pheromone(self, name="pheromoneHome",
-                                       weathering=0.99, redistribution=0.9,
+                                       weathering=0.9, redistribution=0.9,
                                        pointSize=4, redistributionRadius=8)
         self.pheromoneFood = Pheromone(self, name="pheromoneFood",
-                                       weathering=0.99, redistribution=0.9,
+                                       weathering=0.9, redistribution=0.9,
                                        pointSize=4, redistributionRadius=8)
 
         self.pheromoneHome.addAntipode(self.pheromoneFood)

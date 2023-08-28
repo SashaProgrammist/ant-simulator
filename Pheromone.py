@@ -165,7 +165,7 @@ class Pheromone:
                 file.write(f"vec2 {'_' if pheromone.isHaveAntipodes else ''}"
                            f"get{pheromone.name}(in vec2 uv) ""{\n"
                            f"    vec3 color = texture({pheromone.name}, uv).rgb;\n"
-                           f"    return (color.rg - 0.5) * 10 * color.b;\n"
+                           f"    return (color.rg - 0.5) * (1 + color.b);\n"
                            "}\n\n")
 
             for pheromone in Pheromone.pheromones:

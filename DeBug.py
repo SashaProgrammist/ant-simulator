@@ -183,9 +183,9 @@ class DeBug:
 
         shortCodes = {
             '': "rgb", 'r': "r__", 'g': "_g_", 'b': "__b",
-            'rr': "r__", 'gg': "_g_", 'bb': "__b",
-            'rb': "r_b", 'br': "r_b", 'rg': "r_g",
-            'gr': "r_g", 'bg': "_bg", 'gb': "_bg"}
+            'rr': "r__", 'rg': "rg_", 'rb': "r_b",
+            'gr': "rg_", 'gg': "_g_", 'gb': "_gb",
+            'br': "r_b", 'bg': "_gb", 'bb': "__b", }
 
         if len(code) < 3:
             code = code.replace('_', '')

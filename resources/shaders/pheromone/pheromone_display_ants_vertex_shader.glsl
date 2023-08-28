@@ -4,6 +4,7 @@ in vec2 in_position;
 in float in_stackingPheromoneIndex;
 in vec2 in_direction;
 in float in_index;
+in float in_time;
 uniform float pheromone;
 uniform sampler2D pheromoneSampler;
 uniform bool isPheromoneWar;
@@ -27,7 +28,11 @@ void main() {
     vec3 collorIn = texture(pheromoneSampler, (v_position + 1) / 2).rgb;
     float factor = collorIn.b * collorIn.b;
 
-    collor.rg = collor.rg * (1 - factor) + collorIn.rg * factor;
+    collor.rg = collor.rg * (1 - factor) + collorIn.rg * factor * 0.95;
+
+    if (random() - 0.5 > (2 - 2 / (1 + exp(-in_time / 10)))) {
+        collor.a = 0;
+    }
 
     if (isPheromoneWar) {
         if (collorIn.r > 0.99) {
