@@ -59,12 +59,13 @@ class Ants:
         self.ants_transform_direction_prog = self.App.load_program(
             vertex_shader='shaders/ants/ants_transform_direction.glsl',
             varyings=["out_direction"])
+        self.changePheromone_varyings = ["out_pheromoneControlIndex",
+                                         "out_stackingPheromoneIndex",
+                                         "out_isDirectionChanged",
+                                         "out_time"]
         self.ants_transform_changePheromone_prog = self.App.load_program(
             vertex_shader='shaders/ants/ants_transform_changePheromone.glsl',
-            varyings=["out_pheromoneControlIndex",
-                      "out_stackingPheromoneIndex",
-                      "out_isDirectionChanged",
-                      "out_time"])
+            varyings=self.changePheromone_varyings)
 
         self.App.set_uniform(self.ants_graphic_prog, "foodPheromone",
                              self.App.pheromoneFood.id)
@@ -87,6 +88,11 @@ class Ants:
                                           Mapp.mappTexture)
 
         self.initAnts()
+
+        self.transformInUpdate = ["position",
+                                  "direction"]
+        self.dimensionTransform = {"position": 2,
+                                   "direction": 2}
 
     def initAnts(self):
         self.ants = VAO("ants", mode=mgl.POINTS)
@@ -137,7 +143,9 @@ class Ants:
 
         pheromoneControlIndexData = \
             np.array([self.App.pheromoneFood.id] * self.countAnts, dtype=np.float32)
-        self.ants.buffer(pheromoneControlIndexData, "1f", ["in_pheromoneControlIndex"])
+        self.ants.buffer(pheromoneControlIndexData,
+                         "1f",
+                         ["in_pheromoneControlIndex"])
         self.buffers.append(AntBufferInfo(
             self.ants.get_buffer_by_name("in_pheromoneControlIndex"), "1f"))
 
@@ -170,24 +178,19 @@ class Ants:
         self.App.set_uniform(self.ants_transform_direction_prog, "frame_time", frame_time)
         self.App.set_uniform(self.ants_transform_changePheromone_prog, "frame_time", frame_time)
 
+        count = len(self.changePheromone_varyings)
         self.ants.transform(self.ants_transform_changePheromone_prog,
-                            self.temporaryStorages.get(4))
+                            self.temporaryStorages.get(count))
         controlStackingIndex: np.ndarray = \
-            np.frombuffer(self.temporaryStorages.get(4).read(), dtype=np.float32)
-        (self.ants.get_buffer_by_name("in_pheromoneControlIndex")
-         .buffer.write(np.array(controlStackingIndex[::4]).data))
-        (self.ants.get_buffer_by_name("in_stackingPheromoneIndex")
-         .buffer.write(np.array(controlStackingIndex[1::4]).data))
-        (self.ants.get_buffer_by_name("in_isDirectionChanged")
-         .buffer.write(np.array(controlStackingIndex[2::4]).data))
-        (self.ants.get_buffer_by_name("in_time")
-         .buffer.write(np.array(controlStackingIndex[3::4]).data))
+            np.frombuffer(self.temporaryStorages.get(count).read(), dtype=np.float32)
+        for i, name in enumerate(self.changePheromone_varyings):
+            (self.ants.get_buffer_by_name(name.replace("out", "in"))
+             .buffer.write(np.array(controlStackingIndex[i::count]).data))
 
-        self.ants.transform(self.ants_transform_position_prog,
-                            self.temporaryStorages.get(2))
-        (self.ants.get_buffer_by_name("in_position").
-         buffer.write(self.temporaryStorages.get(2).read()))
-        self.ants.transform(self.ants_transform_direction_prog,
-                            self.temporaryStorages.get(2))
-        (self.ants.get_buffer_by_name("in_direction").
-         buffer.write(self.temporaryStorages.get(2).read()))
+        for name in self.transformInUpdate:
+            self.ants.transform(getattr(self, f"ants_transform_{name}_prog"),
+                                self.temporaryStorages.get(
+                                    self.dimensionTransform[name]))
+            (self.ants.get_buffer_by_name(f"in_{name}").
+             buffer.write(self.temporaryStorages.get(
+                self.dimensionTransform[name]).read()))
