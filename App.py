@@ -84,7 +84,7 @@ class App(mglw.WindowConfig):
         self.countTextures += Pheromone.countPheromone
 
         self.anthill = Anthill(App=self,
-                               countAnt=500000,
+                               countAnt=100000,
                                position=(-0.84, 0.8),
                                size=0.07,
                                pointSize=4,
