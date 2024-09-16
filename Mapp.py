@@ -1,4 +1,3 @@
-from moderngl_window import geometry
 import moderngl as mgl
 
 

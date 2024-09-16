@@ -52,7 +52,7 @@ void main() {
     if (len < sensitivityThreshold) {
         pheromoneDirection = vec2(0);
     }
-    angel = (random() + random() - 1) * 0.4;
+    angel = (random() + random() + random() - 1.5) * 1.2;
     rotate(pheromoneDirection, angel);
 
     out_direction = normalize(\
