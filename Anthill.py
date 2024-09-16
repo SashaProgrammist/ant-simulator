@@ -41,7 +41,6 @@ class Anthill:
         width, height = self.size, self.size * self.App.window_size[0] / self.App.window_size[1]
         xPos, yPos = self.position
 
-        # fmt: off
         pos_data = np.array([
             xPos - width / 2.0, yPos + height / 2.0, 0.0,
             xPos - width / 2.0, yPos - height / 2.0, 0.0,

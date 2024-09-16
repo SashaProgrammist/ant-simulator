@@ -1,6 +1,4 @@
 import moderngl as mgl
-import moderngl_window as mglw
-from moderngl_window import geometry
 from moderngl_window.opengl.vao import VAO
 
 from Mapp import Mapp
